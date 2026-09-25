@@ -48,6 +48,10 @@ import app.langboard.BuildConfig
 import app.langboard.core.AssistMode
 import app.langboard.core.LangboardSettings
 import app.langboard.core.LangboardSettings.AfterInsert
+import app.langboard.core.LangboardSettings.ColorSource
+import app.langboard.core.Register
+import app.langboard.billing.Subscription
+import app.langboard.ui.theme.dynamicColorAvailable
 import app.langboard.dictionary.DictionaryManager
 import app.langboard.dictionary.DictionaryStatus
 import app.langboard.history.HistoryStore
@@ -57,19 +61,22 @@ import app.langboard.ui.theme.ReadingPrefs
 import kotlinx.coroutines.launch
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
+fun SettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
   val context = LocalContext.current
   val settings = remember { LangboardSettings(context) }
 
   Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 32.dp)) {
-    ScreenTitle("Settings")
+    PageBar(onBack = onBack)
+    ScreenTitle("Settings", top = 0.dp)
     SuggestionSettings(settings)
     ReadingSettings(settings)
+    AppearanceSettings(settings)
     ConversationContextSettings()
     HistorySettings(settings)
     ReviewSettings(settings)
     SettingsGroup("Chinese model") { ChineseModelCard(Modifier.padding(16.dp)) }
     DictionarySettings()
+    SubscriptionSettings()
     AboutSettings()
   }
 }
@@ -80,6 +87,7 @@ private fun SuggestionSettings(settings: LangboardSettings) {
   var assistMode by remember { mutableStateOf(settings.assistMode) }
   var optionCount by remember { mutableStateOf(settings.optionCount) }
   var afterInsert by remember { mutableStateOf(settings.afterInsert) }
+  var register by remember { mutableStateOf(settings.defaultRegister) }
 
   SettingsGroup("How much help") {
     Column(Modifier.selectableGroup()) {
@@ -113,9 +121,24 @@ private fun SuggestionSettings(settings: LangboardSettings) {
       selected = afterInsert,
     ) { afterInsert = it; settings.afterInsert = it }
     GroupDivider()
+    ChoiceRow(
+      title = "Sound, unless the chat says otherwise",
+      choices = listOf(Register.Casual, Register.Neutral, Register.Formal).map { it to it.choice },
+      selected = register,
+    ) { register = it; settings.defaultRegister = it }
+    GroupDivider()
     NavRow("Keyboard settings", "Languages, and which keyboards are on") {
       context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
     }
+  }
+}
+
+/** Where the app's chrome gets its colors, shared with the theme so a change shows at once. */
+object AppLook {
+  var dynamicColor by mutableStateOf(true)
+
+  fun load(settings: LangboardSettings) {
+    dynamicColor = settings.colorSource == ColorSource.DEVICE
   }
 }
 
@@ -134,14 +157,70 @@ private fun ReadingSettings(settings: LangboardSettings) {
   SettingsGroup("Chinese text") {
     RubyText("我今天有点懒得出门了", fontSize = 22.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp))
     GroupDivider()
-    SwitchRow("Pinyin over Chinese", "In the keyboard, History and the dictionary.", prefs.pinyin) {
+    SwitchRow("Pinyin over Chinese", "In the keyboard, Review and Memory.", prefs.pinyin) {
       settings.showPinyin = it
       AppReading.load(settings)
     }
     GroupDivider()
-    SwitchRow("Color pinyin by tone", "1st red, 2nd green, 3rd blue, 4th purple, neutral gray.", prefs.toneColors, enabled = prefs.pinyin) {
+    SwitchRow("Color pinyin by tone", "1st red, 2nd orange, 3rd blue, 4th purple, neutral gray.", prefs.toneColors, enabled = prefs.pinyin) {
       settings.toneColors = it
       AppReading.load(settings)
+    }
+  }
+}
+
+/** Only where Material You exists; elsewhere the app always uses the Langboard palette. */
+@Composable
+private fun AppearanceSettings(settings: LangboardSettings) {
+  if (!dynamicColorAvailable) return
+  SettingsGroup("Color") {
+    Column(Modifier.selectableGroup()) {
+      listOf(ColorSource.DEVICE to "Match my device", ColorSource.LANGBOARD to "Langboard").forEachIndexed { i, (source, label) ->
+        if (i > 0) GroupDivider()
+        val selected = AppLook.dynamicColor == (source == ColorSource.DEVICE)
+        Row(
+          Modifier
+            .fillMaxWidth()
+            .selectable(selected = selected, role = Role.RadioButton) { settings.colorSource = source; AppLook.load(settings) }
+            .heightIn(min = 56.dp)
+            .padding(start = 8.dp, end = 16.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          RadioButton(selected = selected, onClick = null, modifier = Modifier.padding(horizontal = 8.dp))
+          Spacer(Modifier.width(4.dp))
+          Text(label, style = MaterialTheme.typography.bodyLarge)
+        }
+      }
+    }
+  }
+}
+
+/** Restore and manage; the subscription lives with the Google Play account, Memory with the phone. */
+@Composable
+private fun SubscriptionSettings() {
+  val context = LocalContext.current
+  val scope = rememberCoroutineScope()
+  var note by remember { mutableStateOf<String?>(null) }
+  SettingsGroup(
+    "Subscription",
+    footer = note ?: "Your subscription belongs to your Google Play account. Memory stays on this phone: " +
+      "reinstalling or moving to a new phone restores the subscription, not what you've learned.",
+  ) {
+    NavRow("Manage subscription", "Change plan or cancel, in Google Play") {
+      val url = Subscription.managementUrl?.toString()
+        ?: "https://play.google.com/store/account/subscriptions?package=${context.packageName}"
+      context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+    }
+    GroupDivider()
+    ActionRow("Restore purchases") {
+      scope.launch {
+        note = when (val o = Subscription.restore()) {
+          Subscription.Outcome.Done -> "Subscription restored."
+          Subscription.Outcome.NothingToRestore -> "No subscription found for this Google Play account."
+          is Subscription.Outcome.Failed -> o.message
+          Subscription.Outcome.Cancelled -> null
+        }
+      }
     }
   }
 }
@@ -152,20 +231,20 @@ private fun HistorySettings(settings: LangboardSettings) {
   val scope = rememberCoroutineScope()
   var keep by remember { mutableStateOf(settings.keepHistory) }
   var confirm by remember { mutableStateOf(false) }
-  SettingsGroup("History") {
+  SettingsGroup("Memory") {
     SwitchRow(
-      "Keep history",
-      "What you asked and what Langboard answered, on this phone only. Saved phrases are kept either way.",
+      "Remember my moments",
+      "What you asked and what Langboard answered, on this phone only. It's what Home, Review and Memory are built from. Saved phrases are kept either way.",
       keep,
     ) { keep = it; settings.keepHistory = it }
     GroupDivider()
-    ActionRow("Clear history", destructive = true) { confirm = true }
+    ActionRow("Clear Memory", destructive = true) { confirm = true }
   }
   if (confirm) {
     AlertDialog(
       onDismissRequest = { confirm = false },
-      title = { Text("Clear history?") },
-      text = { Text("This deletes every entry, including saved phrases. It can't be undone.") },
+      title = { Text("Clear Memory?") },
+      text = { Text("This deletes every moment, saved phrase and review progress. It can't be undone.") },
       confirmButton = {
         TextButton(onClick = {
           confirm = false
@@ -222,7 +301,8 @@ private fun AboutSettings() {
         "switch to it and, with conversation context on, the text on screen. With history on, it keeps what you " +
         "asked and what it answered on this phone, never the screen text, and never sends any of it anywhere. " +
         "History is left out of backups.\n\nDictionary searches never leave your phone; the dictionary itself is " +
-        "downloaded once from MDBG, and the Chinese model once from Hugging Face. No account, no ads, no analytics.",
+        "downloaded once from MDBG, and the Chinese model once from Hugging Face. No account, no ads, no analytics. " +
+        "Your subscription goes through Google Play and RevenueCat, which see an anonymous ID and your purchase, never your text.",
       style = MaterialTheme.typography.bodyMedium,
       modifier = Modifier.padding(16.dp),
     )

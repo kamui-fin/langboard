@@ -42,6 +42,8 @@ import app.langboard.core.EditPlan
 import app.langboard.core.FillGapRequest
 import app.langboard.core.FillGapResult
 import app.langboard.core.FragmentDetector
+import app.langboard.core.LangboardSettings
+import app.langboard.billing.Subscription
 import app.langboard.model.Engines
 import app.langboard.model.ModelManager
 import app.langboard.ui.RubyText
@@ -63,10 +65,14 @@ class ProcessTextActivity : ComponentActivity() {
     // English at the end of the selection, or the whole selection when it is only English.
     val detection = (FragmentDetector.detect(selected, null, "", beforeIsComplete = true) as? DetectResult.Found)?.detection
 
+    val settings = LangboardSettings(this)
+    val unlocked = Subscription.activeOffline(settings)
     setContent {
-      LangboardTheme {
+      LangboardTheme(dynamicColor = settings.colorSource == LangboardSettings.ColorSource.DEVICE) {
         Sheet(onDismiss = ::finish) {
-          if (detection == null) {
+          if (!unlocked) {
+            Message("Open Langboard to start your free trial.")
+          } else if (detection == null) {
             Message("Select some English to turn into Chinese.")
           } else {
             Suggestions(detection, readOnly) { c -> finishWith(selected, detection, c, readOnly) }

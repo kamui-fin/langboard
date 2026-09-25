@@ -11,11 +11,14 @@ data class ReviewItem(val key: String, val entry: HistoryEntry, val card: Fsrs.C
  * (a fill, or a saved word with its meaning) is one card, however many times it was looked up.
  */
 class ReviewDeck(entries: List<HistoryEntry>, private val cards: Map<String, Fsrs.Card>) {
+  private val groups: Map<String, List<HistoryEntry>> = entries.filter { it.reviewable }.groupBy { HistoryStore.reviewKey(it) }
+
   /** One entry per card: a saved lookup over an unsaved one, then the newest. */
-  private val byKey: Map<String, HistoryEntry> = entries.filter { it.reviewable }
-    .sortedWith(compareByDescending<HistoryEntry> { it.saved }.thenByDescending { it.createdAt })
-    .distinctBy { HistoryStore.reviewKey(it) }
-    .associateBy { HistoryStore.reviewKey(it) }
+  private val byKey: Map<String, HistoryEntry> = groups.mapValues { (_, list) ->
+    list.sortedWith(compareByDescending<HistoryEntry> { it.saved }.thenByDescending { it.createdAt }).first()
+  }
+
+  private val value: Map<String, Int> = groups.mapValues { (key, list) -> Expression(key, list, null).learningValue }
 
   /** Cards reviewed before and due by [now], the most overdue first. */
   fun due(now: Long): List<ReviewItem> = byKey.mapNotNull { (key, e) ->
@@ -23,16 +26,16 @@ class ReviewDeck(entries: List<HistoryEntry>, private val cards: Map<String, Fsr
   }.sortedBy { it.card.due }
 
   /**
-   * Cards never reviewed, saved ones first, then ones looked up but not used (what the user
-   * didn't know well enough to send), newest first.
+   * Cards never reviewed, the most worth learning first (see [Expression.learningValue]: saved,
+   * needed again, not used), then the newest.
    */
-  fun new(now: Long): List<ReviewItem> = byKey.filterKeys { it !in cards }.values
+  fun new(now: Long): List<ReviewItem> = byKey.filterKeys { it !in cards }
+    .entries
     .sortedWith(
-      compareByDescending<HistoryEntry> { it.saved }
-        .thenBy { it.outcome == Outcome.Inserted }
-        .thenByDescending { it.createdAt }
+      compareByDescending<Map.Entry<String, HistoryEntry>> { value.getValue(it.key) }
+        .thenByDescending { it.value.createdAt }
     )
-    .map { ReviewItem(HistoryStore.reviewKey(it), it, Fsrs.Card(due = now)) }
+    .map { (key, e) -> ReviewItem(key, e, Fsrs.Card(due = now)) }
 
   /**
    * A session within today's [limits]: cards in their learning steps (never limited, or they'd
@@ -63,7 +66,8 @@ class ReviewDeck(entries: List<HistoryEntry>, private val cards: Map<String, Fsr
 }
 
 val HistoryEntry.reviewable: Boolean
-  get() = answer != null && (kind == HistoryKind.Fill || (kind == HistoryKind.Word && meaning != null))
+  get() = answer != null && Insights.hasChinese(answer) &&
+    (kind == HistoryKind.Fill || (kind == HistoryKind.Word && meaning != null))
 
 /** The front of the card: the English asked about, or a saved word's meaning. */
 val HistoryEntry.reviewPrompt: String

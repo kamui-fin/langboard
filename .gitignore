@@ -17,3 +17,5 @@ shared/eval/hymt_eval/build/
 
 # Training runs: adapters, merged weights, GGUFs
 model/runs/
+model/.llama-cuda/
+model/data/raw/

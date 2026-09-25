@@ -24,19 +24,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,9 +62,9 @@ import app.langboard.history.HistoryEntry
 import app.langboard.history.HistoryKind
 import app.langboard.history.HistoryStore
 import app.langboard.history.Outcome
-import app.langboard.history.ReviewDeck
-import app.langboard.core.LangboardSettings
-import app.langboard.history.reviewable
+import app.langboard.history.Insights
+import app.langboard.ui.theme.LocalReadingPrefs
+import androidx.compose.material3.OutlinedButton
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -75,192 +72,22 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 import kotlinx.coroutines.launch
 
-private val Gutter = 24.dp
+private val Gutter = ScreenGutter
 
-/**
- * Everything Langboard answered, newest first and grouped by day, with whether it was used. One
- * entry opens its page; Review walks through phrases English-first to see what stuck.
- */
+/** The day over a run of moments. */
 @Composable
-fun HistoryScreen(modifier: Modifier = Modifier) {
-  val context = LocalContext.current
-  val store = remember { HistoryStore.get(context) }
-  val version by store.version.collectAsStateWithLifecycle()
-  var filter by rememberSaveable { mutableStateOf(HistoryStore.Filter.All) }
-  var entries by remember { mutableStateOf<List<HistoryEntry>?>(null) }
-  var openId by rememberSaveable { mutableStateOf<Long?>(null) }
-  var reviewing by rememberSaveable { mutableStateOf(false) }
-  var deck by remember { mutableStateOf<Pair<ReviewDeck, ReviewDeck.Limits>?>(null) }
-  LaunchedEffect(version, filter) { entries = store.list(filter) }
-  LaunchedEffect(version, reviewing) {
-    val prefs = LangboardSettings(context).review
-    val today = store.reviewedSince(prefs.dayStart(System.currentTimeMillis()))
-    deck = ReviewDeck(store.list(), store.reviewCards()) to ReviewDeck.Limits.of(prefs, today)
-  }
-
-  val open = openId?.let { id -> entries?.firstOrNull { it.id == id } }
-  AnimatedContent(
-    targetState = when {
-      reviewing -> "review"
-      open != null -> "detail"
-      else -> "list"
-    },
-    transitionSpec = { fadeIn(tween(200)) togetherWith fadeOut(tween(120)) },
-    label = "history",
-    modifier = modifier.fillMaxSize(),
-  ) { screen ->
-    when (screen) {
-      "review" -> {
-        BackHandler { reviewing = false }
-        ReviewScreen(onClose = { reviewing = false })
-      }
-      "detail" -> open?.let {
-        BackHandler { openId = null }
-        HistoryDetail(it, onBack = { openId = null })
-      }
-      else -> HistoryList(entries, filter, onFilter = { filter = it }, onOpen = { openId = it.id }, deck = deck, onReview = { reviewing = true })
-    }
-  }
-}
-
-@Composable
-private fun HistoryList(
-  entries: List<HistoryEntry>?,
-  filter: HistoryStore.Filter,
-  onFilter: (HistoryStore.Filter) -> Unit,
-  onOpen: (HistoryEntry) -> Unit,
-  deck: Pair<ReviewDeck, ReviewDeck.Limits>?,
-  onReview: () -> Unit,
-) {
-  val days = remember(entries) { entries.orEmpty().groupBy { dayOf(it.createdAt) } }
-  LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 32.dp)) {
-    item {
-      Column(Modifier.padding(horizontal = Gutter).padding(top = 24.dp)) {
-        Text("History", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(4.dp))
-        Muted("Everything you asked Langboard, on this phone.", MaterialTheme.typography.bodyLarge)
-        Spacer(Modifier.height(20.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          listOf(HistoryStore.Filter.All to "All", HistoryStore.Filter.Used to "Used", HistoryStore.Filter.Saved to "Saved").forEach { (f, label) ->
-            FilterChip(
-              selected = filter == f,
-              onClick = { onFilter(f) },
-              label = { Text(label) },
-              colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-            )
-          }
-        }
-      }
-    }
-    if (filter == HistoryStore.Filter.All && deck != null && entries.orEmpty().any { it.reviewable }) {
-      item { ReviewCard(deck.first, deck.second, onReview) }
-    }
-    when {
-      entries == null -> Unit
-      entries.isEmpty() -> item { EmptyHistory(filter) }
-      else -> days.forEach { (day, list) ->
-        item(key = "day-$day") {
-          Text(
-            dayLabel(day),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = Gutter).padding(top = 32.dp, bottom = 4.dp),
-          )
-        }
-        items(list, key = { it.id }) { e -> HistoryRow(e) { onOpen(e) } }
-      }
-    }
-  }
-}
-
-/** What's due, and a way in; when nothing is, when the next card comes up. */
-@Composable
-private fun ReviewCard(deck: ReviewDeck, limits: ReviewDeck.Limits, onStart: () -> Unit) {
-  val now = remember(deck) { System.currentTimeMillis() }
-  val session = remember(deck, limits) { deck.session(now, limits) }
-  val new = session.count { it.card.lastReview == null }
-  val due = session.size - new
-  val next = remember(deck) { deck.nextDue(now) }
-  val ready = due + new > 0
-  Surface(
-    shape = RoundedCornerShape(24.dp),
-    color = MaterialTheme.colorScheme.surfaceContainer,
-    onClick = onStart,
-    enabled = ready,
-    modifier = Modifier.padding(horizontal = Gutter).padding(top = 24.dp).fillMaxWidth(),
-  ) {
-    Row(Modifier.padding(horizontal = 24.dp, vertical = 22.dp), verticalAlignment = Alignment.CenterVertically) {
-      Column(Modifier.weight(1f)) {
-        Text("Review", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(4.dp))
-        Muted(
-          when {
-            ready -> listOfNotNull(due.takeIf { it > 0 }?.let { "$it due" }, new.takeIf { it > 0 }?.let { "$it new" }).joinToString(" · ")
-            limits.newLeft == 0 && deck.new(now).isNotEmpty() -> "Done for today · more new phrases tomorrow"
-            next != null -> "All caught up · next ${dueLabel(next - now)}"
-            else -> "All caught up"
-          },
-          MaterialTheme.typography.bodyMedium,
-        )
-      }
-      if (ready) {
-        Spacer(Modifier.width(16.dp))
-        Button(onClick = onStart) { Text("Start") }
-      }
-    }
-  }
-}
-
-private fun dueLabel(ms: Long): String {
-  val hours = ms / 3_600_000
-  return when {
-    hours < 1 -> "within the hour"
-    hours < 24 -> "in ${hours}h"
-    hours < 48 -> "tomorrow"
-    else -> "in ${hours / 24} days"
-  }
-}
-
-@Composable
-private fun EmptyHistory(filter: HistoryStore.Filter) {
-  Column(
-    Modifier.fillMaxWidth().padding(horizontal = 40.dp, vertical = 72.dp),
-    horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
-    Box(
-      Modifier.size(56.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape),
-      contentAlignment = Alignment.Center,
-    ) {
-      Icon(
-        painterResource(if (filter == HistoryStore.Filter.Saved) R.drawable.ic_star_border else R.drawable.ic_history),
-        contentDescription = null,
-      )
-    }
-    Spacer(Modifier.height(20.dp))
-    Text(
-      when (filter) {
-        HistoryStore.Filter.All -> "Nothing yet"
-        HistoryStore.Filter.Used -> "Nothing used yet"
-        HistoryStore.Filter.Saved -> "No saved phrases"
-      },
-      style = MaterialTheme.typography.titleMedium,
-    )
-    Spacer(Modifier.height(8.dp))
-    Muted(
-      when (filter) {
-        HistoryStore.Filter.All -> "Each time you switch to Langboard, what it answered shows up here."
-        HistoryStore.Filter.Used -> "Answers you insert into a message show up here."
-        HistoryStore.Filter.Saved -> "Tap ☆ on an answer in the keyboard to keep it here."
-      },
-      MaterialTheme.typography.bodyMedium,
-      center = true,
-    )
-  }
+internal fun DayHeader(day: java.time.LocalDate) {
+  Text(
+    dayLabel(day),
+    style = MaterialTheme.typography.titleSmall,
+    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier = Modifier.padding(horizontal = Gutter).padding(top = 24.dp, bottom = 4.dp),
+  )
 }
 
 /** One lookup: what was asked above, the Chinese below, then how it went. */
 @Composable
-private fun HistoryRow(e: HistoryEntry, onClick: () -> Unit) {
+internal fun HistoryRow(e: HistoryEntry, onClick: () -> Unit) {
   val context = LocalContext.current
   Row(
     Modifier
@@ -313,36 +140,47 @@ private fun StatusDot(o: Outcome) {
 
 // ---------------------------------------------------------------- Detail
 
+/** One moment: what you asked, what Langboard answered, what you did with it. */
 @Composable
-private fun HistoryDetail(e: HistoryEntry, onBack: () -> Unit) {
+fun MomentScreen(id: Long, nav: Navigator, modifier: Modifier = Modifier) {
   val context = LocalContext.current
   val store = remember { HistoryStore.get(context) }
+  val version by store.version.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
-  Column(Modifier.fillMaxSize()) {
-    Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-      IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
-      Spacer(Modifier.weight(1f))
-      IconButton(onClick = { scope.launch { store.setSaved(e.id, !e.saved) } }) {
+  var e by remember { mutableStateOf<HistoryEntry?>(null) }
+  var gone by remember { mutableStateOf(false) }
+  LaunchedEffect(version) { e = store.get(id).also { if (it == null) gone = true } }
+  LaunchedEffect(gone) { if (gone) nav.back() }
+  val entry = e ?: return
+  Column(modifier.fillMaxSize()) {
+    PageBar(onBack = nav::back) {
+      IconButton(onClick = { scope.launch { store.setSaved(entry.id, !entry.saved) } }) {
         Icon(
-          painterResource(if (e.saved) R.drawable.ic_star else R.drawable.ic_star_border),
-          contentDescription = if (e.saved) "Remove from saved" else "Save",
+          painterResource(if (entry.saved) R.drawable.ic_star else R.drawable.ic_star_border),
+          contentDescription = if (entry.saved) "Remove from saved" else "Save",
         )
       }
-      IconButton(onClick = { scope.launch { store.delete(e.id); onBack() } }) {
+      IconButton(onClick = { scope.launch { store.delete(entry.id) } }) {
         Icon(Icons.Filled.Delete, contentDescription = "Delete")
       }
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = Gutter).padding(bottom = 40.dp)) {
       Muted(
-        listOfNotNull(e.kindLabel, fullDate(context, e.createdAt), appName(e.app)).joinToString("  ·  "),
+        listOfNotNull(entry.kindLabel, fullDate(context, entry.createdAt), appName(entry.app)).joinToString("  ·  "),
         MaterialTheme.typography.labelLarge,
       )
       Spacer(Modifier.height(20.dp))
-      when (e.kind) {
-        HistoryKind.Fill -> FillDetail(e)
-        HistoryKind.Check -> CheckDetail(e)
-        HistoryKind.Explain -> ExplainDetail(e)
-        HistoryKind.Word -> WordDetail(e)
+      when (entry.kind) {
+        HistoryKind.Fill -> FillDetail(entry)
+        HistoryKind.Check -> CheckDetail(entry)
+        HistoryKind.Explain -> ExplainDetail(entry)
+        HistoryKind.Word -> WordDetail(entry)
+      }
+      if (entry.kind != HistoryKind.Check && entry.answer != null && Insights.hasChinese(entry.answer)) {
+        Spacer(Modifier.height(32.dp))
+        OutlinedButton(onClick = { nav.open(Page.Expression(HistoryStore.reviewKey(entry))) }) {
+          Text("Everything about ${entry.answer}")
+        }
       }
     }
   }
@@ -427,14 +265,15 @@ private fun WordDetail(e: HistoryEntry) {
 }
 
 @Composable
-private fun Hero(text: String, pinyin: String?, meaning: String?, size: Int = 40) {
-  Text(text, fontSize = size.sp, lineHeight = (size + 10).sp)
-  pinyin?.let { Spacer(Modifier.height(6.dp)); Muted(it, MaterialTheme.typography.titleMedium) }
+internal fun Hero(text: String, pinyin: String?, meaning: String?, size: Int = 40) {
+  // Pinyin comes from RubyText when the user has it on; the stored reading only when they don't.
+  RubyText(text, fontSize = size.sp)
+  if (!LocalReadingPrefs.current.pinyin) pinyin?.let { Spacer(Modifier.height(6.dp)); Muted(it, MaterialTheme.typography.titleMedium) }
   meaning?.let { Spacer(Modifier.height(6.dp)); Text(it, style = MaterialTheme.typography.bodyLarge) }
 }
 
 @Composable
-private fun CandidateList(items: List<Candidate>) {
+internal fun CandidateList(items: List<Candidate>) {
   Column {
     items.forEachIndexed { i, c ->
       if (i > 0) HorizontalDivider(Modifier.padding(vertical = 14.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
@@ -446,7 +285,7 @@ private fun CandidateList(items: List<Candidate>) {
 }
 
 @Composable
-private fun Section(title: String, top: androidx.compose.ui.unit.Dp = 36.dp, content: @Composable () -> Unit) {
+internal fun Section(title: String, top: androidx.compose.ui.unit.Dp = 36.dp, content: @Composable () -> Unit) {
   Spacer(Modifier.height(top))
   Text(
     title.uppercase(),
@@ -501,60 +340,4 @@ private fun statusSentence(e: HistoryEntry): String = when (e.outcome) {
   Outcome.Undone -> "You inserted it, then undid it."
   Outcome.NoAnswer -> "Langboard had no answer."
   Outcome.Shown -> "You looked it up but didn't insert it."
-}
-
-private val KnownApps = mapOf(
-  "com.tencent.mm" to "WeChat",
-  "com.whatsapp" to "WhatsApp",
-  "com.google.android.apps.messaging" to "Messages",
-  "com.android.chrome" to "Chrome",
-  "org.telegram.messenger" to "Telegram",
-  "com.discord" to "Discord",
-  "com.instagram.android" to "Instagram",
-  "jp.naver.line.android" to "LINE",
-  "com.xingin.xhs" to "Xiaohongshu",
-  "com.ss.android.ugc.aweme" to "Douyin",
-  "com.sina.weibo" to "Weibo",
-  "com.tencent.mobileqq" to "QQ",
-  "app.langboard" to "Langboard",
-)
-
-private fun appName(pkg: String?): String? = pkg?.let { KnownApps[it] }
-
-private fun dayOf(ms: Long): LocalDate = Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()).toLocalDate()
-
-private fun dayLabel(day: LocalDate): String {
-  val today = LocalDate.now()
-  return when (day) {
-    today -> "Today"
-    today.minusDays(1) -> "Yesterday"
-    else -> day.format(DateTimeFormatter.ofPattern(if (day.year == today.year) "EEEE, d MMMM" else "d MMMM yyyy"))
-  }
-}
-
-private fun timeOf(context: android.content.Context, ms: Long): String =
-  android.text.format.DateFormat.getTimeFormat(context).format(Date(ms))
-
-private fun fullDate(context: android.content.Context, ms: Long): String {
-  val day = dayOf(ms)
-  return "${dayLabel(day)}, ${timeOf(context, ms)}"
-}
-
-@Composable
-private fun Muted(
-  text: String,
-  style: TextStyle,
-  modifier: Modifier = Modifier,
-  maxLines: Int = Int.MAX_VALUE,
-  center: Boolean = false,
-) {
-  Text(
-    text,
-    style = style,
-    color = MaterialTheme.colorScheme.onSurfaceVariant,
-    maxLines = maxLines,
-    overflow = TextOverflow.Ellipsis,
-    textAlign = if (center) TextAlign.Center else null,
-    modifier = modifier,
-  )
 }

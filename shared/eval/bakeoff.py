@@ -1,7 +1,7 @@
 """Model bakeoff on the whole gold set (handoff §4): every slice, one model, first answer, scored per slice.
 
 Raw models get their best native prompt (--prompt raw): Hy-MT2 its own translation/rewrite templates,
-Qwen3.5 and TranslateGemma a plain instruction. Tuned models get the lb1 contract (--prompt lb1).
+TranslateGemma its translation template for fill, Qwen3.5 a plain instruction. Tuned models get the lb1 contract (--prompt lb1).
 Fill always continues the draft from the text before the gap; decoding is greedy.
 
     python3 shared/eval/bakeoff.py --model ~/models/hymt2/Hy-MT2-1.8B-Q4_K_M.gguf --family hymt --out hymt_q4.json
@@ -101,9 +101,24 @@ def generic_user(r):
     return "\n".join(lines)
 
 
+TG_LANG = {"en": ("English", "en"), "zh": ("Chinese", "zh-Hans")}
+
+
+def translategemma_user(r):
+    """TranslateGemma's own template (its chat_template, text case) for fill; it has no other task,
+    so naturalize falls back to the plain instruction, which its model card allows via raw tokens."""
+    if r.task != "fill":
+        return generic_user(r)
+    (src, sc), (tgt, tc) = TG_LANG[r.source_locale.split("-")[0]], TG_LANG[r.target]
+    return (f"You are a professional {src} ({sc}) to {tgt} ({tc}) translator. Your goal is to accurately convey the "
+            f"meaning and nuances of the original {src} text while adhering to {tgt} grammar, vocabulary, and cultural "
+            f"sensitivities.\nProduce only the {tgt} translation, without any additional explanations or commentary. "
+            f"Please translate the following {src} text into {tgt}:\n\n\n{draft_of(r).strip()}")
+
+
 def raw_prompt(r, family, book):
     head, tail = FAMILIES[family]
-    user = hymt_user(r, book) if family == "hymt" else generic_user(r)
+    user = {"hymt": lambda: hymt_user(r, book), "gemma": lambda: translategemma_user(r)}.get(family, lambda: generic_user(r))()
     return head + user + tail + prefill(r)
 
 
@@ -224,7 +239,7 @@ def print_report(report, label=""):
 def compare(paths):
     runs = [json.load(open(p, encoding="utf-8")) for p in paths]
     slices = sorted({s for r in runs for s in r["report"]})
-    names = [f"{r['model'][:24]} {r['prompt']}" for r in runs]
+    names = [f"{r['family']} {r['prompt']} {r['model'][:20]}" for r in runs]
     print(f"{'slice':15} " + " | ".join(f"{n:>34}" for n in names))
     for s in slices:
         cells = []

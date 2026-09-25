@@ -61,6 +61,7 @@ import app.langboard.history.HistoryKind
 import app.langboard.history.HistoryStore
 import app.langboard.history.Outcome
 import app.langboard.ui.theme.LangboardTheme
+import app.langboard.billing.Subscription
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -92,6 +93,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
     private set
   /** Pinyin and tone colors, from Settings; re-read each time the keyboard shows. */
   var reading by mutableStateOf(ReadingPrefs())
+  private var dynamicColor by mutableStateOf(true)
 
   /** How many options the panel lists (Settings). */
   var optionCount by mutableStateOf(10)
@@ -168,7 +170,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
     return ComposeView(this).apply {
       attachOwners(this)
       setContent {
-        LangboardTheme(reading = reading) {
+        LangboardTheme(reading = reading, dynamicColor = dynamicColor) {
           KeyboardPanel(
             state = state, model = modelState, panel = panel, optionCount = optionCount, quick = quick, words = words, saved = saved, savedTerms = savedTerms,
             onAction = ::onAction, onPanelBounds = ::onPanelBounds,
@@ -239,6 +241,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
     if (!settings.keyboardUsed) settings.keyboardUsed = true
     mode = settings.assistMode
     reading = ReadingPrefs(pinyin = settings.showPinyin, toneColors = settings.toneColors)
+    dynamicColor = settings.colorSource == LangboardSettings.ColorSource.DEVICE
     optionCount = settings.optionCount
     // A restart on the same field keeps what's on screen; edits are re-verified anyway.
     val keep = sameFieldRestart && state !is ImeState.Idle
@@ -329,6 +332,10 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
    * unless the mode is Stuck only, and an empty draft explains the latest message received.
    */
   private fun refresh() {
+    if (!Subscription.activeOffline(settings)) {
+      state = ImeState.Locked
+      return
+    }
     if (fieldSensitive || fieldNonText) {
       state = ImeState.UnsupportedField(sensitive = fieldSensitive)
       return
@@ -363,7 +370,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
           val ctx = chatContext()
           val result = runCatching {
             withTimeoutOrNull(GENERATION_TIMEOUT_MS) {
-              withContext(Dispatchers.Default) { CheckOutcome(naturalizer.review(sentence.sentence, mode, ctx.register.register, ctx.screen)) }
+              withContext(Dispatchers.Default) { CheckOutcome(naturalizer.review(sentence.sentence, mode, ctx.style, ctx.screen)) }
             }
           }
           ensureActive()
@@ -389,7 +396,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
     job = lifecycleScope.launch {
       val ctx = chatContext()
       val request = FillGapRequest(
-        d.contextBefore, d.fragment, d.contextAfter, register = ctx.register.register, screen = ctx.screen,
+        d.contextBefore, d.fragment, d.contextAfter, register = ctx.style, screen = ctx.screen,
       )
       val prompt = runCatching { ModelManager.prompts().fill(request) }.getOrNull()
       cache[request]?.let { state = ImeState.Suggestions(d, it, ctx, prompt); recordFill(d, it, ctx); return@launch }
@@ -436,7 +443,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
 
   /** The screen, read once per invocation within [CONTEXT_TIMEOUT_MS]; empty when context is off. */
   private suspend fun chatContext(): ChatContext = chat ?: withContext(Dispatchers.Default) {
-    ChatContext.of(withTimeoutOrNull(CONTEXT_TIMEOUT_MS) { ConversationContextService.read() } ?: ScreenText.EMPTY)
+    ChatContext.of(withTimeoutOrNull(CONTEXT_TIMEOUT_MS) { ConversationContextService.read() } ?: ScreenText.EMPTY, settings.defaultRegister)
   }.also { chat = it }
 
   /**

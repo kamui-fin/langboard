@@ -17,12 +17,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.langboard.cedict.Pinyin
 import app.langboard.dictionary.Readings
+import app.langboard.ui.theme.LocalAccent
 import app.langboard.ui.theme.LocalReadingPrefs
 import app.langboard.ui.theme.LocalToneColors
 
@@ -42,7 +48,7 @@ fun RubyText(
   maxLines: Int = Int.MAX_VALUE,
 ) {
   val prefs = LocalReadingPrefs.current
-  val accentColor = MaterialTheme.colorScheme.primary
+  val accentColor = LocalAccent.current
   val context = LocalContext.current
   val readings = Readings.get(context)
   // produceState keeps its last value across new text; only use readings that belong to this text.
@@ -105,4 +111,20 @@ private fun highlighted(text: String, ranges: List<IntRange>, accentColor: Color
     if (r.first < 0 || r.last >= text.length) continue
     addStyle(androidx.compose.ui.text.SpanStyle(color = accentColor, fontWeight = FontWeight.SemiBold), r.first, r.last + 1)
 }
+}
+
+/** Numbered pinyin ("lan3 de5") as tone marks, each syllable colored by its tone when the user has tone colors on. */
+@Composable
+internal fun tonedPinyin(numbered: String): AnnotatedString {
+  val prefs = LocalReadingPrefs.current
+  val tones = LocalToneColors.current
+  val muted = MaterialTheme.colorScheme.onSurfaceVariant
+  return buildAnnotatedString {
+    numbered.split(' ').forEachIndexed { i, syllable ->
+      if (i > 0) append(' ')
+      val tone = syllable.lastOrNull()?.digitToIntOrNull()
+      val color = if (prefs.toneColors && tone != null) tones[(tone - 1).coerceIn(0, 4)] else muted
+      withStyle(SpanStyle(color = color)) { append(Pinyin.toToneMarks(syllable)) }
+    }
+  }
 }

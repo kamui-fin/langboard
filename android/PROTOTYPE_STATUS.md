@@ -16,7 +16,7 @@ Langboard is a layer on top of the keyboard people already use, not a keyboard o
 - **No more stand-ins:** the Check rulebook, the Explain slang glossary and the Try-it phrasebook are gone.
 - **Fill continues your sentence:** the model is asked for the whole sentence in Chinese and its answer starts with your own Chinese before the gap, so what it writes has to fit (我本来想 + 玩轮滑, not the noun 旱冰鞋). English tokens are banned while it writes. On the new 100-case dev set: first answer right 58 (was 55), in the top 3 79 (was 71).
 - **Prompts are a file:** `assets/prompts.json` holds every template and decoding setting. `shared/eval/prompt_eval.py` runs it on a laptop with the phone's own engine; a copy pushed to the phone overrides it without a rebuild.
-- **Companion app redesigned:** Try it is replaced by **Write**, a chat box for typing and trying the keyboard. The Dictionary shows every sense in full. Settings is laid out as grouped cards.
+- **Companion app redesigned:** Try it is replaced by **Write**, a chat box for typing and trying the keyboard. Settings is laid out as grouped cards. The Dictionary tab is gone (Pleco already does that job); CC-CEDICT stays for the keyboard's word breakdown and term pages.
 - **Pinyin over every character** (toggle in Settings), colored by tone (also a toggle). The part a suggestion adds is in the one accent color, #F76F53.
 
 | Area | State |
@@ -33,9 +33,10 @@ Langboard is a layer on top of the keyboard people already use, not a keyboard o
 | Model runtime (llama.cpp/JNI, `:llama`), beam search, Hy-MT2 fill, check, explain | Working on device (fill and check tested e2e in the app, 26 Sep) |
 | Prompt file + host eval (`prompts.json`, `shared/eval/prompt_eval.py`, `shared/eval/hymt_eval`) | Working; 100-case dev + 150-case locked gold set (`shared/eval/README.md`), not yet reviewed by native speakers |
 | Pinyin ruby + tone colors, accent highlight | Working on device |
-| Companion app: Write, Dictionary, Settings redesign | Checked on device (Write empty state, Dictionary search, Settings); a Write reply not yet seen on device |
+| Companion app: Home, Review, Memory, You (+ Expression Lab, Settings as pages), per `artifacts/APP_ALIGNMENT.md` | Checked on device, light and dark, including a Lab reply and a graded card; tracked in `APP_ALIGNMENT_TODO.md` |
 | Chinese pack: download, verify, prepare, load, remove | Working on device (real 462 MB download) |
-| Billing, free cap, store listing, Play Accessibility declaration | Not started (A3) |
+| Onboarding (6 screens), hard paywall, RevenueCat subscription, keyboard lock | Flow checked on device with the debug unlock; no RevenueCat key or Play products yet |
+| Store listing, Play Accessibility declaration | Not started (A3) |
 
 ## Changes on 25 September
 
@@ -125,7 +126,7 @@ android/
 │       ├── dictionary/             # CC-CEDICT download/index/search/breakdown + OpenDictionary.kt
 │       ├── history/                # HistoryStore (lookups, review cards, review log), ReviewDeck (what's due, daily limits), ReviewTuner
 │       ├── model/                  # ModelManager (state, load once, remove), ModelDownloadWorker
-│       └── ui/                     # Write, History, ReviewScreen (flip card), Dictionary, Settings (+ ReviewSettings), Conversation Context disclosure; Components.kt (shared title, pill field, settings groups)
+│       └── ui/                     # Write, ReviewTab + ReviewScreen (flip card), History, Settings (+ ReviewSettings), Conversation Context disclosure; Components.kt (shared title, pill field, settings groups)
 ├── cedict/                         # pure Kotlin CC-CEDICT library
 ├── llama/                          # engine.cpp (prefix cache, greedy, beam search, Latin ban, continuation scoring) + JNI + LlamaModel
 ├── third_party/llama.cpp           # fetched by tools/fetch_llama_cpp.sh at a pinned commit; gitignored
@@ -294,7 +295,7 @@ Clean-up (`HyMtPrompts`): the answer is cut from the continuation at the last po
 - **Cards:** every fill with an answer, and every saved word with a meaning; one card per Chinese answer and kind (`Fill|懒得去了`). Front: "How do you say" and the English (or "Which word means" and a word's meaning). Back: the English small, the Chinese large with pinyin, and the sentence it was used in.
 - **Session:** cards still in their learning steps (never limited, so nothing stalls halfway), then due reviews up to what's left of today's review limit, most overdue first, then new cards up to what's left of today's new limit. A card graded to come back within 20 minutes stays in the session.
 - **Screen:** "3 of 12" with a progress bar. Show answer (or tap the card) flips it in 3D: perspective, a spring, a slight dip halfway; the face swaps when edge-on. Then Again / Hard / Good / Easy, each with when you'd see it again (1m, 6m, 10m, 8d for a new card; Good is the filled one). The next card slides in from the right. The end screen says when the next review is due.
-- **History tab card:** "5 due · 3 new", "Done for today · more new phrases tomorrow", or "All caught up · next tomorrow".
+- **Review tab** (its own tab, no longer inside History): "5 due · 3 new", "Done for today · more new phrases tomorrow", or "All caught up · next tomorrow".
 - **Settings → Review:** New phrases per day, Reviews per day, and a Remember slider (80–97%) that says what moving it costs. **Advanced:** learning and relearning steps (typed as "1m 10m"), longest gap, when the new day starts, "Tune to my memory" with its status (defaults until 512 reviews, and how many so far; or when it was tuned and from how many), Tune now, Use defaults, and Restore the default settings.
 - **Storage (`history.db` schema 3, upgraded in place):** `review_cards` (FSRS state per card: state, step, stability, difficulty, due, last review) and `review_log` (every review: card, time, rating, how long it took, and the card's state before it). The log is what tuning learns from and what daily limits count: new cards by their first review, reviews by Review-state entries since the review day began. Clear history clears both.
 - **Checked against py-fsrs 6.3.2:** four review histories, 30 reviews in all (new cards, lapses, same-day repeats, overdue and early reviews), match its state, step, stability, difficulty and due time to 1e-9. The optimizer's loss matches py-fsrs's to 1e-9 on a simulated learner (2,029 reviews, `src/test/resources/fsrs/simulated_reviews.csv`); tuning takes it from 0.2705 (defaults) to 0.2650, against 0.2647 for the learner's true parameters, in under a second.
@@ -388,6 +389,7 @@ Logs: `adb logcat -s LangboardIme ConversationContext LangboardDict LangboardMod
 
 ## Known gaps and limitations
 
+- **No personalization yet:** suggestions depend on the chat's register and the onboarding default only. Choices, corrections and saves feed Review and Memory, never the model. The lb1 `style`/`personalization` fields aren't built by the app and no model is trained on them. Plan: `APP_ALIGNMENT_TODO.md` §5c.
 - **Dictionary English ranking:** for "good", rare characters (嘏, 媾) rank above 好. The ranking code in `QueryRules.rank` needs work; the UI isn't the cause.
 
 - **Slang in Explain is hit and miss:** the 1.8B model gets 阴阳怪气 and 摆烂 but mistranslates 笑死我了绷不住了 and 有点东西. The key word is now the longest CC-CEDICT word, which knows no slang.

@@ -65,4 +65,18 @@ class ReviewDeckTest {
     assertEquals(ReviewDeck.Limits(3, 150), ReviewDeck.Limits.of(prefs, HistoryStore.DailyCounts(newCards = 7, reviews = 50)))
     assertEquals(ReviewDeck.Limits(0, 0), ReviewDeck.Limits.of(prefs, HistoryStore.DailyCounts(newCards = 12, reviews = 250)))
   }
+
+  @Test fun newCardsNeededAgainComeBeforeOneOffsAndNonChineseIsSkipped() {
+    val day = Fsrs.DAY
+    val deck = ReviewDeck(
+      listOf(
+        fill("x", "一", 5, outcome = Outcome.Inserted),
+        fill("y", "二", 1, outcome = Outcome.Inserted),
+        fill("y", "二", 1 + day, outcome = Outcome.Inserted),
+        fill("ok", "OK", 9),
+      ),
+      emptyMap(),
+    )
+    assertEquals(listOf("二", "一"), deck.new(now).map { it.entry.answer })
+  }
 }

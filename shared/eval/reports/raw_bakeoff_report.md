@@ -1,23 +1,23 @@
-# Raw bakeoff: Hy-MT2-1.8B vs Qwen3.5-2B (dev)
+# Raw bakeoff: Hy-MT2-1.8B vs Qwen3.5-2B vs TranslateGemma 4B (dev)
 
-*25 Sep 2026 · handoff §4 step 1 · `shared/eval/bakeoff.py`, gold dev split (100 legacy Fill + 102 gold_v1) · both Q4_K_M, host CPU, greedy · outputs: `raw_dev_hymt2-q4.json`, `raw_dev_qwen35-q4.json`*
+*25 Sep 2026 · handoff §4 step 1 · `shared/eval/bakeoff.py`, gold dev split (100 legacy Fill + 102 gold_v1) · both Q4_K_M, host CPU, greedy · outputs: `raw_dev_hymt2-q4.json`, `raw_dev_qwen35-q4.json`, `raw_dev_translategemma4b-q4.json`*
 
 Each raw model gets its best native prompt: Hy-MT2 its own translation templates from `prompts.json`
-(plus a "keep it if already natural" line for Naturalize), Qwen3.5 a plain instruction. Fill continues
-the draft from the text before the gap in both. **TranslateGemma 4B is not run yet** (gated: accept the
-Gemma license on Hugging Face first).
+(plus a "keep it if already natural" line for Naturalize), TranslateGemma its translation template for
+Fill and the plain instruction otherwise (it has no other task), Qwen3.5 a plain instruction. Fill
+continues the draft from the text before the gap in all three.
 
 ## Results
 
-| Slice (n) | Hy-MT2 hit | Hy-MT2 critical | Qwen3.5 hit | Qwen3.5 critical |
-| --- | --- | --- | --- | --- |
-| Fill EN→ZH (101) | **70** | 1 | 45 | 10 |
-| Fill ZH→EN (26) | **19** | 1 | 14 | 0 |
-| Naturalize ZH (15) | 1 (5 near) | 0 | 1 (4 near) | 6 |
-| Naturalize EN (13) | 1 (4 near) | 3 | 3 (4 near) | 8 |
-| UNCHANGED (27) | 6 | **21 rewrote natural text** | **26** | 1 |
-| Style (12) | 2 | 5 | 5 | 4 |
-| Personalization (8) | 3 | 3 | **7** | 0 |
+| Slice (n) | Hy-MT2 hit | crit | Qwen3.5 hit | crit | TranslateGemma 4B hit | crit |
+| --- | --- | --- | --- | --- | --- | --- |
+| Fill EN→ZH (101) | **70** | 1 | 45 | 10 | 42 (23 broke the sentence) | 1 |
+| Fill ZH→EN (26) | **19** | 1 | 14 | 0 | 12 | 0 |
+| Naturalize ZH (15) | 1 (5 near) | 0 | 1 (4 near) | 6 | 2 (7 near) | 0 |
+| Naturalize EN (13) | 1 (4 near) | 3 | 3 (4 near) | 8 | 5 (8 near) | 0 |
+| UNCHANGED (27) | 6 | **21** | **26** | 1 | 14 | 13 |
+| Style (12) | 2 | 5 | 5 | 4 | 2 | 4 |
+| Personalization (8) | 3 | 3 | **7** | 0 | 2 | 2 |
 
 *hit* = contains a listed good answer; *near* = within 0.8 similarity of one; *critical* = a listed
 prohibited reading, rewriting an UNCHANGED case, or saying UNCHANGED when the text needs repair.
@@ -33,7 +33,12 @@ Fill answers that never reach the text after the gap count as failures (the chec
   someone else); 我先睡了，明天聊 → 我先去睡了，明天再聊呗. This is the trust failure the product can't ship.
 - **Qwen3.5 holds back, sometimes too much.** 26/27 on UNCHANGED, but it also says UNCHANGED on 8 of
   28 sentences that need a repair. It follows the style profile (咋 for how come, ridiculous for plain wording).
-- Naturalize hit rates are low for both because the listed repairs are only a few of the right ones.
+- **TranslateGemma 4B is not a raw quality ceiling here.** Its Fill failures are mostly format: as a pure
+  translator it rewrites or pads instead of continuing the draft (拐弯抹角，不直接点明; 太高了，简直是敲诈), so
+  23 answers never reach the text after the gap. It is the cleanest at Naturalize (0 critical, most near
+  matches) and halfway on restraint (14/27). Whether 4B buys quality over ~2B can only be read after the
+  same fine-tune, and its full weights are gated (training needs a logged-in Hugging Face token).
+- Naturalize hit rates are low for all because the listed repairs are only a few of the right ones.
   The near column and native rating are the real measure here.
 - Host latency (CPU, greedy): Hy-MT2 ~100–300 ms per case, Qwen3.5 ~450–600 ms. Only device numbers count
   (handoff §19), but the gap is worth watching.
@@ -54,5 +59,6 @@ answers (§4 step 2). Nothing here settles it.
 ```bash
 python3 shared/eval/bakeoff.py --model ~/models/hymt2/Hy-MT2-1.8B-Q4_K_M.gguf --family hymt --latin 6 --out hymt.json
 python3 shared/eval/bakeoff.py --model ~/models/qwen35/Qwen3.5-2B-Q4_K_M.gguf --family qwen35 --latin 6 --out qwen.json
-python3 shared/eval/bakeoff.py --compare hymt.json qwen.json
+python3 shared/eval/bakeoff.py --model ~/models/tgemma/translategemma-4b-it.Q4_K_M.gguf --family gemma --latin 6 --out tg.json
+python3 shared/eval/bakeoff.py --compare hymt.json qwen.json tg.json
 ```

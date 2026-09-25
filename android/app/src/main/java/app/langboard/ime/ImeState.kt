@@ -44,21 +44,32 @@ sealed interface ImeState {
   data class UnsupportedField(val sensitive: Boolean) : ImeState
   data object ChangedText : ImeState
   data object Error : ImeState
+  /** No trial or subscription: the keyboard points to the app instead of answering. */
+  data object Locked : ImeState
 }
 
 /** What was read from the screen for an answer, and what Langboard made of it. In memory only. */
-data class ChatContext(val screen: ScreenText, val register: RegisterGuess, val messages: Int) {
+data class ChatContext(
+  val screen: ScreenText,
+  val register: RegisterGuess,
+  val messages: Int,
+  /** How the user wants to sound when the chat gives no clear hint (Settings, and onboarding). */
+  val fallback: Register = Register.Neutral,
+) {
   val used: Boolean get() = !screen.isEmpty
+
+  /** The register the prompts ask for: the chat's when it showed clear cues, otherwise the user's own. */
+  val style: Register get() = if (register.cues.isNotEmpty()) register.register else fallback
 
   companion object {
     val NONE = ChatContext(ScreenText.EMPTY, RegisterGuess(Register.Neutral, emptyList()), 0)
 
-    fun of(screen: ScreenText): ChatContext {
-      if (screen.isEmpty) return NONE
+    fun of(screen: ScreenText, fallback: Register = Register.Neutral): ChatContext {
+      if (screen.isEmpty) return NONE.copy(fallback = fallback)
       val recent = Conversation.recentMessages(screen)
       // Apps that expose no layout still have text; judge register from the last few lines of it.
       val sample = recent.map { it.text }.ifEmpty { screen.lines.takeLast(Conversation.RECENT_LINES).map { it.text } }
-      return ChatContext(screen, RegisterDetector.infer(sample), recent.size)
+      return ChatContext(screen, RegisterDetector.infer(sample), recent.size, fallback)
     }
   }
 }

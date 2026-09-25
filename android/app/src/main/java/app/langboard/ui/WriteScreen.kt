@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,6 +60,10 @@ import app.langboard.core.DetectResult
 import app.langboard.core.EditPlan
 import app.langboard.core.FillGapRequest
 import app.langboard.core.FragmentDetector
+import app.langboard.core.Candidate
+import app.langboard.history.HistoryEntry
+import app.langboard.history.HistoryKind
+import app.langboard.history.HistoryStore
 import app.langboard.model.Engines
 import app.langboard.model.ModelManager
 import kotlinx.coroutines.CoroutineScope
@@ -71,20 +75,57 @@ internal sealed interface Turn {
   data class Sent(override val id: Int, val text: String) : Turn
   data class Working(override val id: Int) : Turn
   /** [options] are the model's answers, best first; [chosen] is the one shown in the sentence. */
-  data class Reply(override val id: Int, val before: String, val options: List<String>, val chosen: Int, val after: String) : Turn {
+  data class Reply(
+    override val id: Int,
+    val source: String,
+    val before: String,
+    val options: List<String>,
+    val chosen: Int,
+    val after: String,
+    /** The Memory entry, once saved. */
+    val savedId: Long? = null,
+  ) : Turn {
     val replacement get() = options[chosen]
     val text get() = before + replacement + after
   }
   data class Note(override val id: Int, val text: String) : Turn
 }
 
-/** The Write thread. Held by [LangboardApp] so it survives switching tabs; not saved anywhere. */
+/**
+ * The Expression Lab thread: trying a sentence outside any chat. Held by [LangboardApp] so it
+ * survives leaving the Lab; kept nowhere unless the user saves a reply to Memory.
+ */
 class WriteChat {
   internal val turns = mutableStateListOf<Turn>()
   var draft by mutableStateOf(TextFieldValue())
   private var nextId = 0
   internal fun id() = nextId++
   internal val busy get() = turns.lastOrNull() is Turn.Working
+
+  /** Saves [r] to Memory (as a lookup made in the Lab), or un-saves it. */
+  internal fun toggleSave(r: Turn.Reply, store: HistoryStore, scope: CoroutineScope) {
+    val at = turns.indexOfFirst { it.id == r.id }.takeIf { it >= 0 } ?: return
+    scope.launch {
+      if (r.savedId != null) {
+        store.delete(r.savedId)
+        turns[at] = r.copy(savedId = null)
+      } else {
+        val id = store.add(
+          HistoryEntry(
+            createdAt = System.currentTimeMillis(),
+            kind = HistoryKind.Fill,
+            app = "app.langboard",
+            source = r.source,
+            answer = r.replacement,
+            sentence = r.text,
+            items = r.options.filterIndexed { i, _ -> i != r.chosen }.map { Candidate(it, null) },
+            saved = true,
+          )
+        )
+        turns[at] = r.copy(savedId = id)
+      }
+    }
+  }
 
   internal fun send(scope: CoroutineScope) {
     val field = draft
@@ -118,6 +159,7 @@ class WriteChat {
         if (out == null) Turn.Note(working.id, "The text changed; try again.")
         else Turn.Reply(
           id = working.id,
+          source = found.fragment,
           before = out.substring(0, out.length - after.length - plan.commit.length),
           options = r.candidates.map { it.text },
           chosen = 0,
@@ -131,12 +173,13 @@ class WriteChat {
 }
 
 @Composable
-fun WriteScreen(chat: WriteChat, modifier: Modifier = Modifier) {
+fun WriteScreen(chat: WriteChat, onBack: () -> Unit, modifier: Modifier = Modifier) {
   val status = rememberKeyboardStatus()
   val model by ModelManager.state.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
   val list = rememberLazyListState()
   val context = LocalContext.current
+  val store = remember { HistoryStore.get(context) }
 
   // Keep the newest turn in view.
   LaunchedEffect(chat.turns.size, chat.turns.lastOrNull()) {
@@ -146,10 +189,9 @@ fun WriteScreen(chat: WriteChat, modifier: Modifier = Modifier) {
   Column(modifier.fillMaxSize().imePadding()) {
     LazyColumn(state = list, modifier = Modifier.weight(1f).fillMaxWidth()) {
       item {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          ScreenTitle("Langboard", modifier = Modifier.weight(1f))
+        PageBar(onBack = onBack) {
           if (status.ready) {
-            TextButton(onClick = { showPicker(context) }, modifier = Modifier.padding(end = 12.dp, top = 8.dp)) {
+            TextButton(onClick = { showPicker(context) }, modifier = Modifier.padding(end = 4.dp)) {
               Icon(painterResource(R.drawable.ic_keyboard), contentDescription = null, modifier = Modifier.size(18.dp))
               Spacer(Modifier.width(8.dp))
               Text("Switch keyboard")
@@ -157,14 +199,11 @@ fun WriteScreen(chat: WriteChat, modifier: Modifier = Modifier) {
           }
         }
       }
-      if (!status.ready) item { SetupCard(status) }
+      item { ScreenTitle("Expression Lab", "Write the Chinese you know. Use English where you get stuck.", top = 0.dp) }
       if (!model.installed) {
         item {
           SettingsGroup(label = null) { ChineseModelCard(Modifier.padding(20.dp)) }
         }
-      }
-      if (chat.turns.isEmpty()) {
-        item { EmptyHint() }
       }
       items(chat.turns, key = { it.id }) { turn ->
         when (turn) {
@@ -176,26 +215,13 @@ fun WriteScreen(chat: WriteChat, modifier: Modifier = Modifier) {
             onChoose = { i -> chat.turns.indexOfFirst { it.id == turn.id }.takeIf { it >= 0 }?.let { chat.turns[it] = turn.copy(chosen = i) } },
             onEdit = { chat.draft = TextFieldValue(turn.text, TextRange(turn.text.length)) },
             onCopy = { copy(context, turn.text) },
+            onSave = { chat.toggleSave(turn, store, scope) },
           )
         }
       }
       item { Spacer(Modifier.height(12.dp)) }
     }
     Composer(chat, onSend = { chat.send(scope) })
-  }
-}
-
-@Composable
-private fun EmptyHint() {
-  Column(Modifier.fillMaxWidth().padding(horizontal = ScreenGutter, vertical = 32.dp)) {
-    Text("Write in Chinese.", style = MaterialTheme.typography.titleMedium)
-    Text("Use English where you get stuck.", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    Spacer(Modifier.height(8.dp))
-    Text(
-      "Send it here, or switch to Langboard while typing below, just like in any other app.",
-      style = MaterialTheme.typography.bodyMedium,
-      color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
   }
 }
 
@@ -256,7 +282,7 @@ private fun NoteLine(text: String) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ReplyCard(r: Turn.Reply, onChoose: (Int) -> Unit, onEdit: () -> Unit, onCopy: () -> Unit) {
+private fun ReplyCard(r: Turn.Reply, onChoose: (Int) -> Unit, onEdit: () -> Unit, onCopy: () -> Unit, onSave: () -> Unit) {
   Surface(
     shape = RoundedCornerShape(20.dp, 20.dp, 20.dp, 6.dp),
     color = MaterialTheme.colorScheme.surfaceContainer,
@@ -272,12 +298,26 @@ private fun ReplyCard(r: Turn.Reply, onChoose: (Int) -> Unit, onEdit: () -> Unit
       if (r.options.size > 1) {
         Spacer(Modifier.height(10.dp))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(end = 8.dp)) {
-          r.options.forEachIndexed { i, o ->
-            FilterChip(selected = i == r.chosen, onClick = { onChoose(i) }, label = { Text(o, fontSize = 16.sp) })
+          // A handful is enough to compare; the rest are rarely better.
+          r.options.take(MAX_LAB_OPTIONS).forEachIndexed { i, o ->
+            Surface(
+              onClick = { onChoose(i) },
+              shape = RoundedCornerShape(12.dp),
+              color = if (i == r.chosen) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainerLowest,
+            ) {
+              Text(o, fontSize = 16.sp, modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp))
+            }
           }
         }
       }
       Row(Modifier.align(Alignment.End)) {
+        IconButton(onClick = onSave) {
+          Icon(
+            painterResource(if (r.savedId != null) R.drawable.ic_star else R.drawable.ic_star_border),
+            contentDescription = if (r.savedId != null) "Remove from Memory" else "Save to Memory",
+            modifier = Modifier.size(20.dp),
+          )
+        }
         IconButton(onClick = onEdit) { Icon(Icons.Filled.Edit, contentDescription = "Edit") }
         IconButton(onClick = onCopy) {
           Icon(painterResource(R.drawable.ic_content_copy), contentDescription = "Copy", modifier = Modifier.size(20.dp))
@@ -288,8 +328,9 @@ private fun ReplyCard(r: Turn.Reply, onChoose: (Int) -> Unit, onEdit: () -> Unit
 }
 
 @Composable
-private fun SetupCard(status: KeyboardStatus) {
+internal fun SetupCard(status: KeyboardStatus) {
   val context = LocalContext.current
+  val store = remember { HistoryStore.get(context) }
   val done = listOf(status.enabled, status.ready).count { it }
   SettingsGroup(label = null) {
     Row(Modifier.padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 4.dp)) {
@@ -343,10 +384,12 @@ private fun Step(done: Boolean, number: Int, title: String, detail: String, acti
   }
 }
 
-private fun showPicker(context: Context) {
+internal fun showPicker(context: Context) {
   context.getSystemService(InputMethodManager::class.java).showInputMethodPicker()
 }
 
 private fun copy(context: Context, text: String) {
   context.getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("Langboard", text))
 }
+
+private const val MAX_LAB_OPTIONS = 5

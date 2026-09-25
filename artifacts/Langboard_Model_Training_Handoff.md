@@ -200,7 +200,7 @@ Use compact structured tags/fields in the pilot rather than a long prose system 
 
 Personalization should learn HOW the user prefers to express meanings, not infer who the user is. The system uses three layers:
 
-1. Explicit profile — region/variant, default register, slang tolerance, concision, directness/softness.
+1. Explicit profile — region/variant, default register, slang tolerance, concision, directness/softness. The user can also describe how they want to sound in their own words, or paste example messages. That text is compiled (only when they tap Update, never per request) into the same lb1 `style` fields and ≤ 6 `profile` lines, shown back to them as removable chips. The model never sees the raw description. Compile it into linguistic behaviour only: "like people my age text" means short and casual, not an age. What the user states outranks anything learned.
 2. Learned compact style profile — periodically summarized only from repeated high-confidence behavior; e.g. “prefers 啥 over 什么 in friend chat,” “short clauses,” “rarely uses emojis.”
 3. Retrieved examples — 2–3 highly relevant user-approved examples injected into the current prompt.
 
@@ -440,7 +440,7 @@ These references are starting points for agents. Verify current revisions, model
 
 ## Appendix A. Product & systems context for agents
 
-*Added 25 Sep 2026 from `gpt/handoff_gaps.md` and `gpt/DIRECTION.md`. Read this before making any design choice the sections above leave open.*
+*Added 25 Sep 2026 from `artifacts/handoff_gaps.md` and `artifacts/DIRECTION.md`. Read this before making any design choice the sections above leave open.*
 
 ### A.1 What Langboard is
 

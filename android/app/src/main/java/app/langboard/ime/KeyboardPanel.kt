@@ -825,6 +825,10 @@ private fun Status(state: ImeState, onAction: (ImeAction) -> Unit) {
       )
       ImeState.ChangedText -> Message(Icons.Filled.Refresh, "The message changed", null, retry, onAction)
       ImeState.Error -> Message(Icons.Filled.Warning, "Something went wrong", null, retry, onAction)
+      ImeState.Locked -> Message(
+        Icons.Filled.Lock, "Start your free trial", "Open Langboard to try it free for 7 days.",
+        "Open Langboard" to ImeAction.OpenApp, onAction,
+      )
       else -> Unit
     }
   }

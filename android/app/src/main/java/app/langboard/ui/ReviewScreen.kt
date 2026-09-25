@@ -62,6 +62,13 @@ import app.langboard.history.ReviewItem
 import app.langboard.history.ReviewTuner
 import app.langboard.core.LangboardSettings
 import app.langboard.history.reviewPrompt
+import app.langboard.history.HistoryEntry
+import app.langboard.ui.theme.LocalAccent
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -76,7 +83,7 @@ private val Gutter = 24.dp
  * card again. Cards graded Again or Hard come back in this session; the rest wait until they're due.
  */
 @Composable
-internal fun ReviewScreen(onClose: () -> Unit) {
+internal fun ReviewScreen(onClose: () -> Unit, modifier: Modifier = Modifier) {
   val context = LocalContext.current
   val store = remember { HistoryStore.get(context) }
   val settings = remember { LangboardSettings(context) }
@@ -124,7 +131,7 @@ internal fun ReviewScreen(onClose: () -> Unit) {
     shownAt = now
   }
 
-  Column(Modifier.fillMaxSize()) {
+  Column(modifier.fillMaxSize()) {
     Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
       IconButton(onClick = onClose) { Icon(Icons.Filled.Close, contentDescription = "Close review") }
       Spacer(Modifier.weight(1f))
@@ -149,7 +156,7 @@ internal fun ReviewScreen(onClose: () -> Unit) {
     }
 
     val item = queue.firstOrNull()
-    Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = Gutter, vertical = 20.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = Gutter, vertical = 16.dp), contentAlignment = Alignment.Center) {
       when {
         !loaded -> Unit
         item == null -> Finished(total, nextDue, onClose)
@@ -238,15 +245,48 @@ private val CardHeight: Dp = 400.dp
 
 @Composable
 private fun BoxScope.Front(item: ReviewItem) {
+  val e = item.entry
+  val gap = remember(e) { gapIn(e) }
   Column(
     Modifier.align(Alignment.Center).padding(28.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    Label(if (item.entry.kind == HistoryKind.Word) "Which word means" else "How do you say")
-    Spacer(Modifier.height(14.dp))
-    Text(item.entry.reviewPrompt, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+    if (gap != null) {
+      // The moment it came from: your own sentence, with the part you couldn't say left open.
+      Label(appName(e.app)?.takeIf { e.app != "app.langboard" }?.let { "In $it" } ?: "You were writing")
+      Spacer(Modifier.height(20.dp))
+      Text(
+        buildAnnotatedString {
+          append(gap.first)
+          withStyle(SpanStyle(color = LocalAccent.current, fontWeight = FontWeight.SemiBold)) { append(" ＿＿＿ ") }
+          append(gap.second)
+        },
+        fontSize = 24.sp,
+        lineHeight = 34.sp,
+        textAlign = TextAlign.Center,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis,
+      )
+      Spacer(Modifier.height(24.dp))
+      Text("“${e.reviewPrompt}”", style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+    } else {
+      Label(if (e.kind == HistoryKind.Word) "Which word means" else "How do you say")
+      Spacer(Modifier.height(14.dp))
+      Text(e.reviewPrompt, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+    }
   }
-  Label(if (item.card.lastReview == null) "New" else "Tap to flip", Modifier.align(Alignment.BottomCenter).padding(bottom = 22.dp))
+  if (item.card.lastReview == null) Label("New", Modifier.align(Alignment.BottomCenter).padding(bottom = 22.dp))
+}
+
+/** The sentence the answer went into, split around it; null when there's no real sentence around it. */
+private fun gapIn(e: HistoryEntry): Pair<String, String>? {
+  val s = e.sentence ?: return null
+  val a = e.answer ?: return null
+  if (e.kind != HistoryKind.Fill || s == a) return null
+  val i = s.indexOf(a).takeIf { it >= 0 } ?: return null
+  val before = s.substring(0, i)
+  val after = s.substring(i + a.length)
+  return if (before.isBlank() && after.isBlank()) null else before to after
 }
 
 @Composable

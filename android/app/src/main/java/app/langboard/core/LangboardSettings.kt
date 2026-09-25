@@ -9,6 +9,42 @@ class LangboardSettings(context: Context) {
 
   enum class AfterInsert { STAY, RETURN }
 
+  /** Where the app's chrome gets its colors: the phone's Material You palette, or Langboard's own. */
+  enum class ColorSource { DEVICE, LANGBOARD }
+
+  var colorSource: ColorSource
+    get() = prefs.getString(KEY_COLOR_SOURCE, null)?.let { runCatching { ColorSource.valueOf(it) }.getOrNull() }
+      ?: ColorSource.DEVICE
+    set(value) = prefs.edit().putString(KEY_COLOR_SOURCE, value.name).apply()
+
+  /** How the user wants to sound when the conversation gives no hint (onboarding: Casual / Neutral / Work). */
+  var defaultRegister: Register
+    get() = prefs.getString(KEY_DEFAULT_REGISTER, null)?.let { runCatching { Register.valueOf(it) }.getOrNull() }
+      ?: Register.Casual
+    set(value) = prefs.edit().putString(KEY_DEFAULT_REGISTER, value.name).apply()
+
+  /** The screens before the trial have been seen once; a lapsed subscriber goes straight to the paywall. */
+  var introSeen: Boolean
+    get() = prefs.getBoolean(KEY_INTRO_SEEN, false)
+    set(value) = prefs.edit().putBoolean(KEY_INTRO_SEEN, value).apply()
+
+  /** Keyboard setup after the trial started is finished or skipped. */
+  var setupDone: Boolean
+    get() = prefs.getBoolean(KEY_SETUP_DONE, false)
+    set(value) = prefs.edit().putBoolean(KEY_SETUP_DONE, value).apply()
+
+  /**
+   * The last entitlement the app saw, for the keyboard: it never uses the network, so it trusts this
+   * until [proExpiresAt] (-1: no end, e.g. lifetime or a debug build).
+   */
+  var proActive: Boolean
+    get() = prefs.getBoolean(KEY_PRO_ACTIVE, false)
+    set(value) = prefs.edit().putBoolean(KEY_PRO_ACTIVE, value).apply()
+
+  var proExpiresAt: Long
+    get() = prefs.getLong(KEY_PRO_EXPIRES_AT, -1)
+    set(value) = prefs.edit().putLong(KEY_PRO_EXPIRES_AT, value).apply()
+
   var afterInsert: AfterInsert
     get() = prefs.getString(KEY_AFTER_INSERT, null)?.let { runCatching { AfterInsert.valueOf(it) }.getOrNull() }
       ?: AfterInsert.RETURN
@@ -90,6 +126,12 @@ class LangboardSettings(context: Context) {
   companion object {
     /** The model searches 10 beams, so 10 is every option it has. */
     val OPTION_COUNTS = listOf(3, 5, 10)
+    private const val KEY_COLOR_SOURCE = "color_source"
+    private const val KEY_DEFAULT_REGISTER = "default_register"
+    private const val KEY_INTRO_SEEN = "intro_seen"
+    private const val KEY_SETUP_DONE = "setup_done"
+    private const val KEY_PRO_ACTIVE = "pro_active"
+    private const val KEY_PRO_EXPIRES_AT = "pro_expires_at"
     private const val KEY_OPTION_COUNT = "option_count"
     private const val KEY_SHOW_PINYIN = "show_pinyin"
     private const val KEY_TONE_COLORS = "tone_colors"
