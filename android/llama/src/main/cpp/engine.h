@@ -37,6 +37,9 @@ struct Sampling {
     uint32_t seed = 1;
     // Never pick a token with an ASCII letter in it (a Chinese answer shouldn't copy the English).
     bool ban_latin = false;
+    // Softer: subtract this from the logit of every such token, so an answer only uses Latin letters
+    // (AA制, K歌, AI) when the model strongly prefers them. Ignored when ban_latin is set.
+    float latin_penalty = 0.0f;
 };
 
 struct BeamParams {
@@ -48,8 +51,9 @@ struct BeamParams {
     bool stop_at_newline = true;
     // A token whose text contains one of these ends a hypothesis, with the token kept.
     std::vector<std::string> stops = {"。", "！", "？"};
-    // As Sampling::ban_latin.
+    // As Sampling::ban_latin and Sampling::latin_penalty.
     bool ban_latin = false;
+    float latin_penalty = 0.0f;
     // A hypothesis whose text contains this after its first byte ends there, with its last token kept
     // (the text after the gap, reached).
     std::string stop_text;
@@ -119,9 +123,10 @@ Status Engine::generate(const std::string & prompt, const Sampling & s, Timings 
     if (st != OK) return st;
 
     llama_sampler * smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
-    if (s.ban_latin) {
+    if (s.ban_latin || s.latin_penalty > 0.0f) {
+        const float b = s.ban_latin ? -INFINITY : -s.latin_penalty;
         std::vector<llama_logit_bias> bias;
-        for (llama_token tok : latin_tokens()) bias.push_back({tok, -INFINITY});
+        for (llama_token tok : latin_tokens()) bias.push_back({tok, b});
         llama_sampler_chain_add(smpl, llama_sampler_init_logit_bias(llama_vocab_n_tokens(vocab), (int32_t) bias.size(), bias.data()));
     }
     // top-k first: the repetition penalty is slow over the whole 120k vocabulary.

@@ -27,8 +27,11 @@ data class Sampling(
   val topP: Float = 0.6f,
   val repeatPenalty: Float = 1.05f,
   val seed: Int = 1,
-  /** Never pick a token with an ASCII letter in it: a Chinese answer shouldn't copy the English. */
-  val banLatin: Boolean = false,
+  /**
+   * Subtracted from the logit of every token with an ASCII letter in it, so a Chinese answer only
+   * uses Latin letters (AI, AA制, K歌) when the model strongly prefers them. Infinity bans them.
+   */
+  val latinPenalty: Float = 0f,
 )
 
 data class Completion(
@@ -53,8 +56,8 @@ data class BeamSearch(
   val lengthAlpha: Float = 0f,
   /** A newline ends a hypothesis: answers are one line. */
   val stopAtNewline: Boolean = true,
-  /** As [Sampling.banLatin]. */
-  val banLatin: Boolean = false,
+  /** As [Sampling.latinPenalty]. */
+  val latinPenalty: Float = 0f,
   /** A token whose text contains one of these ends a hypothesis, with the token kept. */
   val stops: List<String> = listOf("。", "！", "？"),
   /** A hypothesis whose text contains this after its first character ends there. Empty for none. */
@@ -94,7 +97,7 @@ class LlamaModel private constructor(private var handle: Long, val contextSize: 
       val t = LongArray(8)
       LlamaNative.generate(
         handle, prompt.toByteArray(Charsets.UTF_8), sampling.maxTokens, sampling.temperature,
-        sampling.topK, sampling.topP, sampling.repeatPenalty, sampling.seed, sampling.banLatin, sink, t,
+        sampling.topK, sampling.topP, sampling.repeatPenalty, sampling.seed, sampling.latinPenalty, sink, t,
       )
       t
     }
@@ -113,7 +116,7 @@ class LlamaModel private constructor(private var handle: Long, val contextSize: 
       val t = LongArray(8)
       out = LlamaNative.beams(
         handle, prompt.toByteArray(Charsets.UTF_8), search.beams, search.maxTokens, search.lengthAlpha,
-        search.stopAtNewline, search.banLatin, search.stops.map { it.toByteArray(Charsets.UTF_8) }.toTypedArray(),
+        search.stopAtNewline, search.latinPenalty, search.stops.map { it.toByteArray(Charsets.UTF_8) }.toTypedArray(),
         search.stopText.toByteArray(Charsets.UTF_8), search.keepUnfinished, scores, t,
       )
       t
@@ -243,12 +246,12 @@ internal object LlamaNative {
   /** Timings go into [out]: {status, promptTokens, generatedTokens, promptUs, firstTokenUs, totalUs, reusedTokens, logprob µnats}. */
   external fun generate(
     handle: Long, prompt: ByteArray, maxTokens: Int, temperature: Float, topK: Int, topP: Float,
-    repeatPenalty: Float, seed: Int, banLatin: Boolean, sink: TokenSink, out: LongArray,
+    repeatPenalty: Float, seed: Int, latinPenalty: Float, sink: TokenSink, out: LongArray,
   ): Long
   /** Completions best first; their log-probabilities go into [scores], timings into [out] as for [generate]. */
   external fun beams(
     handle: Long, prompt: ByteArray, beams: Int, maxTokens: Int, lengthAlpha: Float, stopAtNewline: Boolean,
-    banLatin: Boolean, stops: Array<ByteArray>, stopText: ByteArray, keepUnfinished: Boolean, scores: FloatArray, out: LongArray,
+    latinPenalty: Float, stops: Array<ByteArray>, stopText: ByteArray, keepUnfinished: Boolean, scores: FloatArray, out: LongArray,
   ): Array<ByteArray>
   /** Log-probabilities of [continuations] after [prompt] go into [logprobs], timings into [out] as for [generate]. */
   external fun score(handle: Long, prompt: ByteArray, continuations: Array<ByteArray>, logprobs: FloatArray, out: LongArray): Long

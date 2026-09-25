@@ -102,13 +102,26 @@ rules, and fill replaces exactly the gap span. An output that fails is dropped, 
 - not overlong: a Chinese fill answer is at most 16 characters (or the fragment's length, if that is
   longer), an English one at most 10 words (or 4 per Chinese character of the fragment), and a
   naturalize repair at most twice the original plus 10 characters;
-- a Chinese target contains no Latin letters, except established loan words that are ordinary Mainland
-  usage (`ZH_LATIN_OK`: AA制, K歌, KTV, PUA, 有点emo, OK, app, PPT…). **Open:** the phone currently bans every
-  Latin token while decoding, so it can never produce AA制 or K歌, which the gold set lists as right answers.
-  The ban needs the same allowlist, or those cases stay unreachable;
+- a Chinese target uses Latin letters only the way Chinese does: all-caps acronyms up to five letters
+  (AI, CC, PPT, AA制, K歌) or a short list of lowercase loans (`ZH_LATIN_OK`: 有点emo, app, wifi, cc…).
+  `ghost了`, `burn了` or `siempre` are leaks, and so is the English fragment copied back;
 - an English target contains no CJK characters;
 - a fill answer does not repeat the character or word on either side of the gap (太…太, 了…了, so so).
   Not counted: 不了/得了 + 了 (去不了了), and 一 (统一 + 一下).
+
+### Latin letters while decoding
+
+The phone used to ban every token with an ASCII letter during Fill decoding. Measured on the 100 dev
+Fill cases (25 Sep 2026), the ban changes no first answer on the shipped 1.25-bit model, and costs one
+on Q4_K_M (请CC我一下, which is what offices say). Without it, junk appears lower in the list (ghost了,
+siempre 会). The shipped setting is now a soft penalty (`fill.latin_penalty` 6.0 in `prompts.json`):
+it matches the ban's top 3 and top 10 exactly and lets through Latin the model strongly prefers. The
+rule above then filters what is shown.
+
+| Dev Fill (first / top 3 / top 10) | ban | none | penalty 3 | penalty 6 |
+| --- | --- | --- | --- | --- |
+| 1.25-bit (shipped) | 58 / 79 / 89 | 58 / 78 / 89 | 58 / 79 / 89 | 58 / 79 / 89 |
+| Q4_K_M | 77 / 87 / 91 | 77 / 86 / 89 | 77 / 86 / 91 | 77 / 87 / 91 (78 with CC accepted) |
 
 ## Chat templates
 

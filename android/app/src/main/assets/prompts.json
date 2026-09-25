@@ -23,7 +23,8 @@
     "rescore": 0,
     "after_chars": 3,
     "end_mark": "。",
-    "pin_first": false
+    "pin_first": false,
+    "latin_penalty": 6.0
   },
   "explain": {
     "template": "[Background Information]\n{context}\n\nPlease translate the following text into English, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\n{message}",

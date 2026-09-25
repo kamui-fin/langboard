@@ -40,6 +40,8 @@ class PromptBook(
     val endMark: String,
     /** The first answer stays first, so the list doesn't move under the user's finger. */
     val pinFirst: Boolean,
+    /** Logit penalty on tokens with Latin letters; infinity (the default when unset) bans them. */
+    val latinPenalty: Float = Float.POSITIVE_INFINITY,
   )
 
   class Explain(
@@ -118,6 +120,7 @@ class PromptBook(
           afterChars = f.getInt("after_chars"),
           endMark = f.getString("end_mark"),
           pinFirst = f.getBoolean("pin_first"),
+          latinPenalty = f.optDouble("latin_penalty", Double.POSITIVE_INFINITY).toFloat(),
         ),
         explain = Explain(
           template = e.getString("template"),

@@ -39,7 +39,7 @@ When a learner types a Chinese message with one English gap, the first option is
 | R1 | Option 1 fits the gap grammatically with the given before and after | Gold set, "patch fit" rater score |
 | R2 | Meaning preserved, including attitude; no added cause or emotion (累, 忙) | Gold set, "meaning" score + prohibited readings per case |
 | R3 | Register follows the chat (casual friend / neutral / work / formal) | Gold set register bins |
-| R4 | Never outputs English, pinyin, explanations or quote marks | Mechanical check on every output |
+| R4 | Never outputs English (beyond the acronyms and loans Chinese itself uses: AI, AA制, 有点emo), pinyin, explanations or quote marks | Mechanical check on every output (`shared/contract` `check`) |
 | R5 | Never repeats text on either side of the gap (太…太, 去去) | Mechanical check |
 | R6 | Several options when Mandarin genuinely varies, ordered by fit | Top-3 hit rate |
 | R7 | Latency and memory no worse than today on a Pixel 6a: first answer ≤ 1.5 s without chat, all options ≤ 3.5 s, RSS ≤ 1 GB | `ModelBenchmarkTest` |

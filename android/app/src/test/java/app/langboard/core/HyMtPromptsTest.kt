@@ -98,6 +98,16 @@ class HyMtPromptsTest {
     assertEquals(listOf("迟到了", "晚点到"), HyMtPrompts.cleanFills(listOf("迟到了", "迟到了。", "晚点到", "late"), r, 10))
   }
 
+  @Test fun fillKeepsLatinChineseReallyUsesAndDropsLeaks() {
+    assertEquals("AA制", HyMtPrompts.cleanFill("AA制", req("那我们", "split the bill", "吧")))
+    assertEquals("CC", HyMtPrompts.cleanFill("CC", req("请", "cc", "我一下")))
+    assertEquals("AI", HyMtPrompts.cleanFill("AI", req("我在研究", "artificial intelligence", "")))
+    assertEquals("有点emo", HyMtPrompts.cleanFill("有点emo", req("今天", "kinda down", "")))
+    assertNull(HyMtPrompts.cleanFill("ghost了", req("他又", "ghosted", "我")))
+    assertNull(HyMtPrompts.cleanFill("siempre 会", req("他", "always", "迟到")))
+    assertNull(HyMtPrompts.cleanFill("hiking", req("我们去", "hiking", "吧")))
+  }
+
   @Test fun checkIgnoresPunctuationAndParticlesUnlessPicky() {
     assertNull(HyMtPrompts.cleanCheck("你吃饭了吗？", "你吃饭了吗", ScreenText.EMPTY, picky = false))
     assertNull(HyMtPrompts.cleanCheck("我好累啊", "我好累", ScreenText.EMPTY, picky = false))

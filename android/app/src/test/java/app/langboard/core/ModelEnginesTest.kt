@@ -23,12 +23,12 @@ class ModelEnginesTest {
     private val reply = reply ?: beams?.firstOrNull()?.first
     var prompt: String? = null
     var stoppedAt: String? = null
-    var banned = false
+    var latinPenalty = 0f
     var search: Beams? = null
     var scored: List<String>? = null
-    override suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, banLatin: Boolean, onText: (String) -> Boolean): Scored? {
+    override suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, latinPenalty: Float, onText: (String) -> Boolean): Scored? {
       this.prompt = prompt
-      banned = banLatin
+      this.latinPenalty = latinPenalty
       val reply = reply ?: return null
       // Stream a character at a time, as the model does, and honor the stop.
       for (i in 1..reply.length) if (!onText(reply.take(i))) return Scored(reply.take(i), Math.log(replyP)).also { stoppedAt = it.text }
@@ -59,7 +59,9 @@ class ModelEnginesTest {
     val m = Fake(reply = "玩轮滑", beams = listOf("玩轮滑" to 0.2, "玩旱冰。" to 0.1, "roller skate" to 0.1))
     val r = engine(m).fill(FillGapRequest("我本来想", "roller skate", ""))
     assertTrue(m.prompt!!.endsWith("我本来想roller skate<｜hy_Assistant｜>我本来想"))
-    assertTrue(m.banned && m.search!!.banLatin)
+    // The shipped prompts penalize Latin letters rather than ban them, in both passes.
+    assertEquals(6f, m.latinPenalty)
+    assertEquals(6f, m.search!!.latinPenalty)
     assertNull(m.scored)
     assertEquals(listOf("玩轮滑", "玩旱冰"), r?.candidates?.map { it.text })
     assertEquals(2f / 3, r!!.share!!, 1e-5f)

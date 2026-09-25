@@ -71,15 +71,15 @@ class ModelBenchmarkTest {
     /** Milliseconds and tokens generated per pass: greedy, beams, score. */
     val passes = StringBuilder()
 
-    override suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, banLatin: Boolean, onText: (String) -> Boolean): Scored {
-      val c = model.complete(prompt, Sampling(maxTokens = maxTokens, repeatPenalty = repeatPenalty, banLatin = banLatin), onText)
+    override suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, latinPenalty: Float, onText: (String) -> Boolean): Scored {
+      val c = model.complete(prompt, Sampling(maxTokens = maxTokens, repeatPenalty = repeatPenalty, latinPenalty = latinPenalty), onText)
       if (first == null) first = c
       passes.append("greedy ${c.totalMs}ms/${c.generatedTokens}t ")
       return Scored(c.text, c.logprob)
     }
 
     override suspend fun beams(prompt: String, search: Beams): List<Scored> {
-      val (hyps, c) = model.beams(prompt, BeamSearch(search.beams, search.maxTokens, search.lengthAlpha, true, search.banLatin, search.stops, search.stopText, search.keepUnfinished))
+      val (hyps, c) = model.beams(prompt, BeamSearch(search.beams, search.maxTokens, search.lengthAlpha, true, search.latinPenalty, search.stops, search.stopText, search.keepUnfinished))
       passes.append("beams ${c.totalMs}ms/${c.generatedTokens}t ")
       return hyps.map { Scored(it.text, it.logprob.toDouble()) }
     }

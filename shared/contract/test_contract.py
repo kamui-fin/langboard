@@ -114,6 +114,19 @@ class Parse(unittest.TestCase):
         self.assertEqual(parse(fill(), "离谱了吧哈哈"), "离谱")
         self.assertEqual(parse(fill(after="了吧，我都不知道说啥"), "离谱了吧，"), "离谱")
 
+    def test_fill_cut_inside_after(self):
+        self.assertEqual(parse(fill(before="我", after="了"), "去不了了"), "去不了")
+        en = Request(task="fill", source_locale="zh-Hans-CN", target_locale="en-US", before="", fragment="要不",
+                     after=" we just get pizza?")
+        self.assertEqual(parse(en, "How about we"), "How about")
+        self.assertEqual(parse(en, "Why don't we just get pizza?"), "Why don't")
+        bk = Request(task="fill", source_locale="zh-Hans-CN", target_locale="en-US", before="", fragment="别客气",
+                     after="! happy to help")
+        self.assertEqual(parse(bk, "No problem! Happy to help"), "No problem")
+        sw = Request(task="fill", source_locale="zh-Hans-CN", target_locale="en-US", before="it was ", fragment="很甜",
+                     after=" wedding")
+        self.assertEqual(parse(sw, " such a sweet wedding"), "such a sweet")
+
     def test_fill_wandered(self):
         self.assertIsNone(parse(fill(), "离谱啊"))
         self.assertIsNone(parse(fill(), "了吧"))
@@ -140,6 +153,10 @@ class Check(unittest.TestCase):
         self.assertEqual(check(fill(before="我们需要", after="一下"), "统一"), [])
         self.assertEqual(check(fill(before="那我们", after="吧"), "AA制"), [])
         self.assertEqual(check(fill(before="这个考试", after=""), "so easy"), ["latin_in_zh"])
+        for ok in ("AI", "CC", "cc一下", "有点emo", "K歌", "PPT"):
+            self.assertEqual(check(fill(before="请", after=""), ok), [], ok)
+        for leak in ("ghost了", "siempre 会", "Ghost了"):
+            self.assertEqual(check(fill(before="他", after=""), leak), ["latin_in_zh"], leak)
 
     def test_en_fill(self):
         r = Request(task="fill", source_locale="zh-Hans-CN", target_locale="en-US", before="I'm so", fragment="无语", after="with him")

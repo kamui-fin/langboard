@@ -6,10 +6,10 @@ package app.langboard.core
  */
 interface TextModel {
   /**
-   * Greedy decoding. [onText] gets the output so far and returns false once it has enough. With
-   * [banLatin], no token with an ASCII letter is picked. Must be cancellable.
+   * Greedy decoding. [onText] gets the output so far and returns false once it has enough. Tokens
+   * with an ASCII letter lose [latinPenalty] (infinity bans them). Must be cancellable.
    */
-  suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, banLatin: Boolean = false, onText: (String) -> Boolean): Scored?
+  suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, latinPenalty: Float = 0f, onText: (String) -> Boolean): Scored?
 
   /** The most likely distinct completions, best first, by beam search. Must be cancellable. */
   suspend fun beams(prompt: String, search: Beams): List<Scored>?
@@ -23,7 +23,7 @@ data class Beams(
   val beams: Int,
   val maxTokens: Int,
   val lengthAlpha: Float,
-  val banLatin: Boolean = false,
+  val latinPenalty: Float = 0f,
   val stops: List<String> = listOf("。", "！", "？"),
   val stopText: String = "",
   val keepUnfinished: Boolean = false,
@@ -36,7 +36,8 @@ data class Scored(val text: String, val logprob: Double)
  * Fill Gap on Hy-MT2. The prompt asks for the whole sentence in Chinese and starts the answer with
  * the user's Chinese before the gap ([PromptBook.fill]), so the model writes on from there; what it
  * writes has to fit the sentence (我本来想 + 玩轮滑, not the noun 旱冰鞋). Tokens with English
- * letters are banned, so it can't copy the English back.
+ * letters are penalized ([PromptBook.Fill.latinPenalty]), so it rarely copies the English back but
+ * can still answer AI or AA制; [HyMtPrompts.cleanFill] drops copies and other English that slips through.
  *
  * Passes over one prompt, which stays cached:
  * 1. Greedy (the likeliest token each step): the first answer, to [onFirst] straight away.
@@ -70,11 +71,11 @@ class ModelFillGapEngine(
       '\n' in text || stops.any { it in text } || (stopText.isNotEmpty() && text.indexOf(stopText, 1) >= 0)
     }
     // No repetition penalty: the greedy answer should be the likeliest path, comparable with the beams.
-    val greedy = model.complete(prompt, budget, 1f, banLatin = true) { !reached(it) } ?: return null
+    val greedy = model.complete(prompt, budget, 1f, latinPenalty = f.latinPenalty) { !reached(it) } ?: return null
     val first = HyMtPrompts.gapAnswer(greedy.text, request)
     if (first != null) onFirst(FillGapResult(first, version, more = true))
     val beams = model.beams(
-      prompt, Beams(f.beams, budget, f.lengthAlpha, banLatin = true, stops = stops, stopText = stopText, keepUnfinished = true),
+      prompt, Beams(f.beams, budget, f.lengthAlpha, latinPenalty = f.latinPenalty, stops = stops, stopText = stopText, keepUnfinished = true),
     ).orEmpty()
     val ranked = rank(first.takeIf { f.pinFirst }, if (f.rescore > 0) rescored(prompt, request, head, first, beams, f) ?: return null else fitting(request, beams + greedy))
     if (ranked.isEmpty()) return null

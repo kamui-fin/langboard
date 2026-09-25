@@ -151,8 +151,8 @@ float length_norm(int len, float alpha) {
 }
 
 // The k most likely next tokens after these logits, as log-probabilities under the full
-// distribution; tokens marked in banned (when not null) are never among them.
-void top_k_logprobs(const float * logits, int n_vocab, int k, const std::vector<char> * banned,
+// distribution; tokens marked in penalized (when not null) lose `penalty` (infinity bans them).
+void top_k_logprobs(const float * logits, int n_vocab, int k, const std::vector<char> * penalized, float penalty,
                     std::vector<std::pair<float, llama_token>> & out) {
     float max = logits[0];
     for (int i = 1; i < n_vocab; ++i) max = std::max(max, logits[i]);
@@ -162,7 +162,7 @@ void top_k_logprobs(const float * logits, int n_vocab, int k, const std::vector<
 
     out.clear();
     out.reserve(n_vocab);
-    for (int i = 0; i < n_vocab; ++i) out.emplace_back(banned && (*banned)[i] ? -INFINITY : logits[i], i);
+    for (int i = 0; i < n_vocab; ++i) out.emplace_back(penalized && (*penalized)[i] ? logits[i] - penalty : logits[i], i);
     k = std::min(k, n_vocab);
     std::partial_sort(out.begin(), out.begin() + k, out.end(), [](auto & a, auto & b) { return a.first > b.first; });
     out.resize(k);
@@ -182,10 +182,11 @@ Status Engine::beams(const std::string & prompt, const BeamParams & p, Timings &
 
     llama_memory_t mem = llama_get_memory(ctx);
     const int n_vocab = llama_vocab_n_tokens(vocab);
-    const std::vector<char> * banned = nullptr;
-    if (p.ban_latin) {
+    const std::vector<char> * penalized = nullptr;
+    const float penalty = p.ban_latin ? INFINITY : p.latin_penalty;
+    if (penalty > 0.0f) {
         latin_tokens();
-        banned = &is_latin;
+        penalized = &is_latin;
     }
     std::vector<Beam> alive;
     std::vector<Hypothesis> finished;
@@ -224,7 +225,7 @@ Status Engine::beams(const std::string & prompt, const BeamParams & p, Timings &
         for (int i = 0; i < parents; ++i) {
             const float * logits = llama_get_logits_ith(ctx, step == 0 ? -1 : i);
             const float base = step == 0 ? 0.0f : alive[i].logprob;
-            top_k_logprobs(logits, n_vocab, B, banned, top);
+            top_k_logprobs(logits, n_vocab, B, penalized, penalty, top);
             for (auto & [lp, tok] : top) expansions.push_back({step == 0 ? -1 : i, tok, base + lp});
         }
         std::sort(expansions.begin(), expansions.end(), [](auto & a, auto & b) { return a.logprob > b.logprob; });

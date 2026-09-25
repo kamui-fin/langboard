@@ -3,7 +3,7 @@
 //   {"prompt": "...", "mode": "beams", "beams": 10, "max_tokens": 24, "length_alpha": 0.6}
 //   {"prompt": "...", "mode": "greedy", "max_tokens": 64, "repeat_penalty": 1.05}
 //   {"prompt": "...", "mode": "score", "continuations": ["...", "..."]}
-// Beams and greedy also take "ban_latin": true; beams take "stops": ["。", "，"]; greedy takes
+// Beams and greedy also take "ban_latin": true, or a softer "latin_penalty": 4.0; beams take "stops": ["。", "，"]; greedy takes
 // "stops" too (output ends after the first piece containing one). Both take "stop_text": output ends
 // once it contains this after its first byte; beams take "keep_unfinished".
 // Usage: hymt_eval model.gguf [threads]
@@ -45,6 +45,7 @@ int main(int argc, char ** argv) {
             p.max_tokens = req.value("max_tokens", 24);
             p.length_alpha = req.value("length_alpha", 0.6f);
             p.ban_latin = req.value("ban_latin", false);
+            p.latin_penalty = req.value("latin_penalty", 0.0f);
             if (req.contains("stops")) p.stops = req["stops"].get<std::vector<std::string>>();
             p.stop_text = req.value("stop_text", "");
             p.keep_unfinished = req.value("keep_unfinished", false);
@@ -59,6 +60,7 @@ int main(int argc, char ** argv) {
         } else {
             lb::Sampling s;
             s.ban_latin = req.value("ban_latin", false);
+            s.latin_penalty = req.value("latin_penalty", 0.0f);
             const std::vector<std::string> stops = req.value("stops", std::vector<std::string>{});
             const std::string stop_text = req.value("stop_text", "");
             s.max_tokens = req.value("max_tokens", 64);

@@ -112,7 +112,7 @@ Java_app_langboard_llama_LlamaNative_free(JNIEnv *, jobject, jlong handle) {
 extern "C" JNIEXPORT jlong JNICALL
 Java_app_langboard_llama_LlamaNative_generate(
         JNIEnv * env, jobject, jlong handle, jbyteArray jprompt, jint max_tokens,
-        jfloat temp, jint top_k, jfloat top_p, jfloat repeat_penalty, jint seed, jboolean ban_latin, jobject callback,
+        jfloat temp, jint top_k, jfloat top_p, jfloat repeat_penalty, jint seed, jfloat latin_penalty, jobject callback,
         jlongArray out) {
     jclass cls = env->GetObjectClass(callback);
     jmethodID on_bytes = env->GetMethodID(cls, "onBytes", "([B)Z");
@@ -123,7 +123,7 @@ Java_app_langboard_llama_LlamaNative_generate(
     s.top_p = top_p;
     s.repeat_penalty = repeat_penalty;
     s.seed = (uint32_t) seed;
-    s.ban_latin = ban_latin;
+    s.latin_penalty = latin_penalty;
     lb::Timings t;
     bool failed = false;
     lb::Status status = engine(handle)->generate(to_utf8(env, jprompt), s, t, [&](const std::string & piece) {
@@ -145,14 +145,14 @@ Java_app_langboard_llama_LlamaNative_generate(
 extern "C" JNIEXPORT jobjectArray JNICALL
 Java_app_langboard_llama_LlamaNative_beams(
         JNIEnv * env, jobject, jlong handle, jbyteArray jprompt, jint beams, jint max_tokens,
-        jfloat length_alpha, jboolean stop_at_newline, jboolean ban_latin, jobjectArray stops, jbyteArray stop_text,
+        jfloat length_alpha, jboolean stop_at_newline, jfloat latin_penalty, jobjectArray stops, jbyteArray stop_text,
         jboolean keep_unfinished, jfloatArray scores, jlongArray out) {
     lb::BeamParams p;
     p.beams = beams;
     p.max_tokens = max_tokens;
     p.length_alpha = length_alpha;
     p.stop_at_newline = stop_at_newline;
-    p.ban_latin = ban_latin;
+    p.latin_penalty = latin_penalty;
     p.stops = to_utf8_list(env, stops);
     p.stop_text = to_utf8(env, stop_text);
     p.keep_unfinished = keep_unfinished;

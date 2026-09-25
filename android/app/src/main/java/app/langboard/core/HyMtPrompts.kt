@@ -18,8 +18,17 @@ object HyMtPrompts {
     // A line copied back from the chat isn't an answer; nor is English copied from the prompt.
     if (r.screen.lines.any { l -> l.text.trim().let { it.length >= 4 && (s.contains(it) || (s.length >= 6 && it.contains(s))) } }) return null
     if (s.count(FragmentDetector::isLatinLetter) > 2 && r.fragment.split(' ').any { it.length > 2 && s.contains(it, ignoreCase = true) }) return null
+    // Other English is a leak unless Chinese really writes it that way (AI, CC, AA制, 有点emo).
+    if (!LATIN_WORD.findAll(s).all { latinOk(it.value) }) return null
     return s
   }
+
+  private val LATIN_WORD = Regex("[A-Za-z]+")
+
+  /** Loans Chinese writes in lowercase; all-caps acronyms up to five letters are fine too. Mirrors contract.ZH_LATIN_OK. */
+  private val LATIN_LOANS = setOf("emo", "ok", "app", "wifi", "cc", "vlog", "pdf", "logo")
+
+  fun latinOk(word: String): Boolean = (word.length <= 5 && word.all { it.isUpperCase() }) || word.lowercase() in LATIN_LOANS
 
   /**
    * The answer in a continuation of the sentence (the model writes on from the Chinese before the
@@ -107,7 +116,8 @@ object HyMtPrompts {
     s = s.trim().trim('“', '”', '"', '「', '」', '【', '】')
     // A lone full stop doesn't belong mid-sentence; the user's own punctuation follows.
     if (r.after.isNotBlank() || r.before.isNotBlank()) s = s.trimEnd('。')
-    return s.takeIf { it.any(FragmentDetector::isCjkIdeograph) }
+    // Chinese, or a bare acronym Chinese uses as is (AI, PPT).
+    return s.takeIf { it.any(FragmentDetector::isCjkIdeograph) || (s.length in 2..5 && s.all { c -> c in 'A'..'Z' }) }
   }
 
   fun cleanTranslation(output: String): String? = firstLine(output).trim('"', '“', '”').takeIf { it.isNotBlank() }

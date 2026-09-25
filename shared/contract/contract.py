@@ -215,19 +215,37 @@ def parse(r, completion):
     text = completion
     after = defuse(r.after).strip()
     if after:
-        i = text.find(after)
+        i = gap_end(text, after, r.target == "en")
         if i < 0:
-            head = after[:3]  # beams stop a few characters into the after text
-            i = text.find(head) if head else -1
-            if i < 0:
-                return None
+            return None
         text = text[:i]
     return text.strip() or None
 
 
+def gap_end(text, after, en):
+    """Where the text after the gap begins in a continuation: the last point from which the rest of
+    the continuation starts with that text, or is its start (decoding stops a few characters in).
+    A partial match needs two characters, so 去不了了 before 了吧 does not cut after 去不了.
+    English compares case-insensitively and only at word starts."""
+    t, a = (text.lower(), after.lower()) if en else (text, after)
+    need = min(2, len(a))
+    for i in range(len(t) - 1, -1, -1):
+        rest = t[i:].rstrip()
+        if not rest or (en and i > 0 and t[i - 1].isalnum() and a[:1].isalnum()) or rest[0].isspace():
+            continue
+        if rest.startswith(a) or (a.startswith(rest) and len(rest) >= need):
+            return i
+    return -1
+
+
 LATIN = re.compile(r"[A-Za-z]+")
-# Latin-letter words that are ordinary Mainland Chinese (AA制, K歌, 有点emo). Anything else is an English leak.
-ZH_LATIN_OK = {"AA", "K", "KTV", "PUA", "emo", "OK", "ok", "app", "App", "APP", "wifi", "WiFi", "PPT", "DDL", "VIP", "ID"}
+# Latin letters in a Chinese answer are fine when Chinese really uses them: an all-caps acronym (AI, CC,
+# PPT, AA制, K歌) or one of these lowercase loans (有点emo). Anything else (ghost了, siempre) is a leak.
+ZH_LATIN_OK = {"emo", "ok", "app", "wifi", "cc", "vlog", "pdf", "logo"}
+
+
+def zh_latin_ok(word):
+    return (word.isupper() and len(word) <= 5) or word.lower() in ZH_LATIN_OK
 CJK = re.compile(r"[㐀-鿿豈-﫿]")
 
 
@@ -252,7 +270,7 @@ def check(r, answer):
         return problems
     if too_long(r, answer):
         problems.append("too_long")
-    if r.target == "zh" and any(w not in ZH_LATIN_OK for w in LATIN.findall(answer)):
+    if r.target == "zh" and not all(zh_latin_ok(w) for w in LATIN.findall(answer)):
         problems.append("latin_in_zh")
     if r.target == "en" and CJK.search(answer):
         problems.append("cjk_in_en")

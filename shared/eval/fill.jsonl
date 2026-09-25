@@ -79,7 +79,7 @@
 {"id": "work-loopin", "bins": ["work", "literal"], "before": "我会把小王", "fragment": "loop in", "after": "", "register": "neutral", "chat": [], "good": ["拉进来", "拉进群", "抄送上", "加进来", "拉上", "叫上"], "bad": ["循环"], "reviewed": false}
 {"id": "work-promptreply", "bins": ["work", "literal", "after"], "before": "感谢您的", "fragment": "prompt reply", "after": "。", "register": "formal", "chat": [], "good": ["及时回复", "快速回复", "迅速回复", "及时回复"], "bad": ["提示"], "reviewed": false}
 {"id": "work-bandwidth", "bins": ["work", "after"], "before": "我这边", "fragment": "bandwidth", "after": "不太够", "register": "neutral", "chat": [], "good": ["精力", "时间", "人手", "带宽"], "bad": [], "reviewed": false}
-{"id": "work-cc", "bins": ["work", "after"], "before": "请", "fragment": "cc", "after": "我一下", "register": "neutral", "chat": [], "good": ["抄送"], "bad": ["复写"], "reviewed": false}
+{"id": "work-cc", "bins": ["work", "after"], "before": "请", "fragment": "cc", "after": "我一下", "register": "neutral", "chat": [], "good": ["抄送", "CC", "cc"], "bad": ["复写"], "reviewed": false}
 {"id": "work-align", "bins": ["work", "literal", "after"], "before": "我们需要", "fragment": "align", "after": "一下", "register": "neutral", "chat": [], "good": ["对齐", "统一", "沟通", "对", "对一下", "同步"], "bad": ["排列", "直线"], "reviewed": false}
 {"id": "work-inconvenience", "bins": ["work", "after"], "before": "很抱歉给您", "fragment": "any inconvenience", "after": "。", "register": "formal", "chat": [], "good": ["带来不便", "带来的不便", "造成不便", "添麻烦了", "带来麻烦", "造成的不便"], "bad": ["不方便"], "reviewed": false}
 {"id": "after-expensive", "bins": ["after"], "before": "这也太", "fragment": "expensive", "after": "了", "register": "casual", "chat": [], "good": ["贵"], "bad": ["昂贵"], "reviewed": false}

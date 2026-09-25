@@ -127,10 +127,10 @@ object ModelManager : TextModel {
     if (::app.isInitialized && model == null && file.exists()) scope.launch { ensureLoaded() }
   }
 
-  override suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, banLatin: Boolean, onText: (String) -> Boolean): Scored? {
+  override suspend fun complete(prompt: String, maxTokens: Int, repeatPenalty: Float, latinPenalty: Float, onText: (String) -> Boolean): Scored? {
     if (!ensureLoaded()) return null
     val m = model ?: return null
-    val c = m.complete(prompt, Sampling(maxTokens = maxTokens, repeatPenalty = repeatPenalty, banLatin = banLatin), onText)
+    val c = m.complete(prompt, Sampling(maxTokens = maxTokens, repeatPenalty = repeatPenalty, latinPenalty = latinPenalty), onText)
     Log.d(TAG, "complete: prompt ${c.promptTokens} tok (${c.reusedTokens} reused) ${c.promptMs} ms, total ${c.totalMs} ms") // never text
     return Scored(c.text, c.logprob)
   }
@@ -141,7 +141,7 @@ object ModelManager : TextModel {
     val (hyps, c) = m.beams(
       prompt,
       BeamSearch(
-        beams = search.beams, maxTokens = search.maxTokens, lengthAlpha = search.lengthAlpha, banLatin = search.banLatin,
+        beams = search.beams, maxTokens = search.maxTokens, lengthAlpha = search.lengthAlpha, latinPenalty = search.latinPenalty,
         stops = search.stops, stopText = search.stopText, keepUnfinished = search.keepUnfinished,
       ),
     )

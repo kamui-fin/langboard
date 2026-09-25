@@ -1,0 +1,12 @@
+source_id,upstream_url,original_author,license_snapshot,checked,allowed_use,derived_transformations,commercial_checkpoint,status,notes
+langboard-gold-v1,shared/eval,Langboard (Claude-drafted; native review pending),internal,2026-09-25,eval only,none,no (eval never trains),green,Frozen eval; never in training or teacher prompts
+xiangjinyu-humanize,https://huggingface.co/datasets/XiangJinYu/Qwen3.5-9B-Humanize-Dataset,XiangJinYu (CSL abstracts),CC BY-NC 4.0,2026-09-25,research/method reference,none,no,red,Academic prose; method reference only
+genz-to-english,https://huggingface.co/datasets/Sankar-2910/genz-to-english,Sankar-2910,Apache-2.0 (card),2026-09-25,meaning reference; eval-case mining,none,no (likely LLM-generated; provenance unverified),yellow,Targets are flattened assistant English
+fcgec,https://github.com/xlxwalex/FCGEC,Xu et al. 2022,repo Apache-2.0; data terms unconfirmed,2026-09-25,none planned,none,no,yellow,Exam/news native errors; low relevance
+yaclc,https://github.com/blcuicall/YACLC,BLCU et al.,non-commercial research; commercial by purchase,2026-09-25,eval design reference,none,no (unless licensed),red,Most relevant: fluency rewrites + acceptability votes; ask for commercial license
+mucgec,https://github.com/HillZhang1999/MuCGEC,Zhang et al. 2022,repo Apache-2.0; data from research-only learner corpora,2026-09-25,ChERRANT scorer (code); data reference,none,no (data); yes (scorer code),yellow,Use ChERRANT for edit precision
+tatoeba-cmn-eng,https://tatoeba.org,Tatoeba contributors,CC BY 2.0 FR,2026-09-25,training candidate with attribution,filter to Simplified short chat-like pairs; native review of Chinese side,yes after review,green,Chinese side often translationese; English side native
+ascend,https://huggingface.co/datasets/CAiRE/ASCEND,Lovenia et al. (HKUST),CC BY-SA 4.0,2026-09-25,code-switching reference,none,no (share-alike; not target register),yellow,Informs which English words Chinese keeps
+lccc,https://huggingface.co/datasets/thu-coai/lccc,THU-COAI (Weibo),MIT repo; scraped Weibo text,2026-09-25,research reference only,none,no,red,Scraped social media
+kdconv,https://huggingface.co/datasets/thu-coai/kd_conv_with_kb,THU-COAI,Apache-2.0,2026-09-25,possible,none,possible,green,Stiff knowledge-chat register; low value
+jfleg,https://huggingface.co/datasets/jhu-clsp/jfleg,Napoles et al.,CC BY-NC-SA 4.0,2026-09-25,eval design reference,none,no,red,English fluency rewrites

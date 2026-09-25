@@ -19,6 +19,7 @@ produced by model/convert_hymt_gguf.py); pass --model to use another.
 """
 
 import argparse
+import re
 import json
 import os
 import subprocess
@@ -26,6 +27,8 @@ import sys
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))  # shared/eval: the cases live here
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "contract"))
+from contract import zh_latin_ok  # noqa: E402  (mirrored in HyMtPrompts.latinOk)
 ANDROID = os.path.join(os.path.dirname(os.path.dirname(HERE)), "android")
 EVAL_DIR = os.path.join(HERE, "hymt_eval")
 BINARY = os.path.join(EVAL_DIR, "build", "hymt_eval")
@@ -183,7 +186,8 @@ def clean_fill(out, before, after, chat=(), fragment="", trim_after=True):
     s = s.strip().strip("“”\"「」【】")
     if after.strip() or before.strip():
         s = s.rstrip("。")
-    if not any(is_cjk(c) for c in s):
+    # Chinese, or a bare acronym Chinese uses as is (AI, PPT, KTV).
+    if not any(is_cjk(c) for c in s) and not (2 <= len(s) <= 5 and s.isascii() and s.isalpha() and s.isupper()):
         return None
     # The sentence around the gap, echoed back, isn't an answer.
     bare = "".join(c for c in s if c.isalnum())
@@ -192,6 +196,9 @@ def clean_fill(out, before, after, chat=(), fragment="", trim_after=True):
         return None
     # English copied from the prompt isn't an answer.
     if sum(c.isascii() and c.isalpha() for c in s) > 2 and any(len(w) > 2 and w.lower() in s.lower() for w in fragment.split(" ")):
+        return None
+    # Other English is a leak unless Chinese really writes it that way (AI, CC, AA制, 有点emo).
+    if not all(zh_latin_ok(w) for w in re.findall(r"[A-Za-z]+", s)):
         return None
     # A line copied back from the chat isn't an answer.
     for line in chat:
@@ -263,9 +270,9 @@ def fill_case(book, model, case):
     st, stop_text = stops(case["after"])
     # Room for the answer and the start of the text after it.
     budget = f["max_tokens"] + len(after_head(case["after"], f["after_chars"]))
-    g = model(prompt=prompt, mode="greedy", max_tokens=budget, repeat_penalty=1.0, ban_latin=True, stops=st, stop_text=stop_text)
+    g = model(prompt=prompt, mode="greedy", max_tokens=budget, repeat_penalty=1.0, stops=st, stop_text=stop_text, **LATIN)
     b = model(prompt=prompt, mode="beams", beams=f["beams"], max_tokens=budget, length_alpha=f["length_alpha"],
-              ban_latin=True, stops=st, stop_text=stop_text, keep_unfinished=True)
+              stops=st, stop_text=stop_text, keep_unfinished=True, **LATIN)
     ms = g["ms"] + b["ms"]
     first = clean(gap_of(g["text"], case["after"]) or "")
     options = distinct([first] + [clean(gap_of(c["text"], case["after"]) or "") for c in b["candidates"]])[:f["rescore"] + 1]
@@ -291,6 +298,10 @@ def fill_case(book, model, case):
     top = max(sc["logprobs"])
     scored = {o: math.exp(lp - top) for o, lp in zip(options, sc["logprobs"])}
     return rank(first if f["pin_first"] else None, scored), ms, {"greedy": g["text"], "beams": [c["text"] for c in b["candidates"]]}
+
+
+# How Fill decoding treats tokens with Latin letters: banned (shipped), penalized, or left alone.
+LATIN = {"ban_latin": True}
 
 
 def is_latin(c):
@@ -337,7 +348,7 @@ def run_fill(args, book):
 
     n = len(rows)
     pct = lambda k, rs: f"{sum(r[k] for r in rs)}/{len(rs)}"
-    print(f"\n{book.get('version', '?')} on {args.set} ({os.path.basename(args.model)}): "
+    print(f"\n{book.get('version', '?')} on {args.set} ({os.path.basename(args.model)}, latin {args.latin}): "
           f"first {pct('first', rows)}, top 3 {pct('top3', rows)}, top 10 {pct('top10', rows)}; "
           f"prohibited first {pct('bad', rows)}, English first {pct('leak', rows)}, doubled first {pct('dup', rows)}, "
           f"no answer {pct('none', rows)}; median {sorted(r['ms'] for r in rows)[n // 2]} ms; {time.time() - started:.0f}s")
@@ -359,8 +370,16 @@ def main():
     ap.add_argument("--i-mean-it", action="store_true", help="allow the locked set")
     ap.add_argument("--only", help="fill cases whose id contains this")
     ap.add_argument("--out", help="write per-case results as JSON (for shared/eval/rating_sheet.py)")
+    ap.add_argument("--latin", default="book", help="fill decoding: book (the prompts' latin_penalty), ban, none, or a penalty like 4")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
+    LATIN.clear()
+    if args.latin == "book":
+        args.latin = str(json.load(open(args.prompts, encoding="utf-8"))["fill"].get("latin_penalty", "ban"))
+    if args.latin == "ban":
+        LATIN["ban_latin"] = True
+    elif args.latin != "none":
+        LATIN["latin_penalty"] = float(args.latin)
 
     if not os.path.exists(BINARY):
         build()
