@@ -1,0 +1,2960 @@
+{
+ "model": "model-Q4_K_M.gguf",
+ "family": "qwen35",
+ "prompt": "lb1",
+ "latin": "6",
+ "split": "dev",
+ "report": {
+  "fill_en_zh": {
+   "n": 101,
+   "hit": 52,
+   "bad": 7,
+   "check_fail": 3,
+   "median_ms": 302
+  },
+  "fill_zh_en": {
+   "n": 26,
+   "hit": 17,
+   "bad": 0,
+   "check_fail": 3,
+   "median_ms": 305
+  },
+  "naturalize_en": {
+   "n": 13,
+   "hit": 2,
+   "bad": 6,
+   "check_fail": 0,
+   "median_ms": 412,
+   "missed": 4,
+   "near": 5
+  },
+  "naturalize_zh": {
+   "n": 15,
+   "hit": 1,
+   "bad": 6,
+   "check_fail": 0,
+   "median_ms": 343,
+   "missed": 6,
+   "near": 4
+  },
+  "p13n": {
+   "n": 8,
+   "hit": 6,
+   "bad": 0,
+   "check_fail": 0,
+   "median_ms": 299
+  },
+  "style": {
+   "n": 12,
+   "hit": 5,
+   "bad": 5,
+   "check_fail": 0,
+   "median_ms": 263,
+   "missed": 4,
+   "near": 0
+  },
+  "unchanged": {
+   "n": 27,
+   "hit": 25,
+   "bad": 2,
+   "check_fail": 0,
+   "median_ms": 343
+  }
+ },
+ "rows": [
+  {
+   "id": "social-botheredanymore",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "context"
+   ],
+   "raw": "实在没劲了",
+   "ms": 577,
+   "answer": "实在没劲了",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "everyday-concert",
+   "slice": "fill_en_zh",
+   "bins": [
+    "everyday",
+    "after"
+   ],
+   "raw": "周杰伦的演唱会吗？",
+   "ms": 416,
+   "answer": "周杰伦的演唱会",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "slang-insane",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after"
+   ],
+   "raw": "离谱了",
+   "ms": 313,
+   "answer": "离谱",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-mightnotmakeit",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after"
+   ],
+   "raw": "可能会迟到，非常",
+   "ms": 406,
+   "answer": "可能会迟到",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-noway",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "after"
+   ],
+   "raw": "不可能，真的",
+   "ms": 352,
+   "answer": "不可能",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "everyday-runninglate",
+   "slice": "fill_en_zh",
+   "bins": [
+    "everyday",
+    "after"
+   ],
+   "raw": "迟到了，你们",
+   "ms": 365,
+   "answer": "迟到了",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-passiveaggressive",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "literal"
+   ],
+   "raw": "咄咄逼人",
+   "ms": 426,
+   "answer": "咄咄逼人",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "everyday-burnedout",
+   "slice": "fill_en_zh",
+   "bins": [
+    "everyday",
+    "after"
+   ],
+   "raw": "累死了，想",
+   "ms": 341,
+   "answer": "累死了",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "pos-pickup",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after",
+    "literal"
+   ],
+   "raw": "取一下",
+   "ms": 253,
+   "answer": "取",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "idiom-beatingbush",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal"
+   ],
+   "raw": "绕弯子",
+   "ms": 315,
+   "answer": "绕弯子",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-longtimenosee",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "after"
+   ],
+   "raw": "好久不见！最近",
+   "ms": 337,
+   "answer": "好久不见",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-reschedule",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after"
+   ],
+   "raw": "改期会议",
+   "ms": 315,
+   "answer": "改期",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-overrated",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang"
+   ],
+   "raw": "太贵了",
+   "ms": 372,
+   "answer": "太贵了",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-treatdinner",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "after"
+   ],
+   "raw": "请你吃晚饭，谢谢你",
+   "ms": 339,
+   "answer": "请你吃晚饭",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "everyday-awkward",
+   "slice": "fill_en_zh",
+   "bins": [
+    "everyday"
+   ],
+   "raw": "尴尬",
+   "ms": 300,
+   "answer": "尴尬",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-crazybusy",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after"
+   ],
+   "raw": "太忙了，晚",
+   "ms": 372,
+   "answer": "太忙了",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "work-doublebooked",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after",
+    "literal"
+   ],
+   "raw": "周三下午三点被占用了",
+   "ms": 406,
+   "answer": "周三下午三点被占用",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-hanginthere",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "after",
+    "literal"
+   ],
+   "raw": "别着急，我",
+   "ms": 371,
+   "answer": "别着急",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "slang-ripoff",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "literal"
+   ],
+   "raw": "太便宜了。",
+   "ms": 391,
+   "answer": "太便宜了",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-splitbill",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "after"
+   ],
+   "raw": "分账吧",
+   "ms": 302,
+   "answer": "分账",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "pos-rollerskate-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "literal"
+   ],
+   "raw": "溜冰",
+   "ms": 278,
+   "answer": "溜冰",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-rollerskate-n",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos"
+   ],
+   "raw": "溜冰鞋",
+   "ms": 316,
+   "answer": "溜冰鞋",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-text-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "联系你",
+   "ms": 263,
+   "answer": "联系",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-text-n",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "短信我没",
+   "ms": 283,
+   "answer": "短信",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-fish-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "钓鱼吧",
+   "ms": 243,
+   "answer": "钓鱼",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-fish-n",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos"
+   ],
+   "raw": "鱼。",
+   "ms": 241,
+   "answer": "鱼",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-book-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "预订餐厅",
+   "ms": 246,
+   "answer": "预订",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-cook-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "摆了一",
+   "ms": 241,
+   "answer": "摆",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "slang-cooked",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "context",
+    "literal"
+   ],
+   "raw": "崩了",
+   "ms": 309,
+   "answer": "崩",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "pos-iron-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "熨衬衫",
+   "ms": 292,
+   "answer": "熨",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-park-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "辆车上停车的",
+   "ms": 325,
+   "answer": null,
+   "check": [
+    "empty"
+   ],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "pos-park-n",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "公园散散步",
+   "ms": 279,
+   "answer": "公园",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-catch-v",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after",
+    "literal"
+   ],
+   "raw": "抓地铁",
+   "ms": 253,
+   "answer": "抓",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "pos-dating",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "谈恋爱吗",
+   "ms": 248,
+   "answer": "谈恋爱",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "pos-date-n",
+   "slice": "fill_en_zh",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": "约会吧",
+   "ms": 253,
+   "answer": "约会",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "slang-ghosted",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after",
+    "literal"
+   ],
+   "raw": "甩我了",
+   "ms": 261,
+   "answer": "甩",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "slang-cringe",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after"
+   ],
+   "raw": "土了吧",
+   "ms": 309,
+   "answer": "土",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-sus",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after"
+   ],
+   "raw": "可疑啊",
+   "ms": 247,
+   "answer": "可疑",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-lowkey",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "literal",
+    "after"
+   ],
+   "raw": "其实有点",
+   "ms": 251,
+   "answer": "其实",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-slaps",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "literal"
+   ],
+   "raw": "炸裂。",
+   "ms": 330,
+   "answer": "炸裂",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-gaveup",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after"
+   ],
+   "raw": "放弃了",
+   "ms": 249,
+   "answer": "放弃",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-gaslight",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "work",
+    "after"
+   ],
+   "raw": "煤气灯效应我",
+   "ms": 329,
+   "answer": "煤气灯效应",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "slang-simp",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang"
+   ],
+   "raw": "追星族",
+   "ms": 365,
+   "answer": "追星族",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "slang-flex",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after",
+    "literal"
+   ],
+   "raw": "摆架子了",
+   "ms": 313,
+   "answer": "摆架子",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "slang-vibes",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "literal",
+    "after"
+   ],
+   "raw": "很有格调",
+   "ms": 277,
+   "answer": null,
+   "check": [
+    "empty"
+   ],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-touchgrass",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "slang",
+    "literal",
+    "after"
+   ],
+   "raw": "晒晒太阳了",
+   "ms": 321,
+   "answer": "晒晒太阳",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-yapping",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after"
+   ],
+   "raw": "唠叨了",
+   "ms": 268,
+   "answer": "唠叨",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-brokeme",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "literal"
+   ],
+   "raw": "打碎了我。",
+   "ms": 353,
+   "answer": "打碎了我",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-pieceofcake",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal"
+   ],
+   "raw": "小菜一碟。",
+   "ms": 321,
+   "answer": "小菜一碟",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "idiom-callitaday",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal",
+    "after"
+   ],
+   "raw": "作罢吧",
+   "ms": 278,
+   "answer": "作罢",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-pullleg",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal",
+    "after"
+   ],
+   "raw": "扯犊子啦",
+   "ms": 344,
+   "answer": null,
+   "check": [
+    "empty"
+   ],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-sleepon",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal",
+    "after"
+   ],
+   "raw": "睡一睡再说",
+   "ms": 312,
+   "answer": "睡一睡",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "idiom-spillbeans",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal",
+    "after"
+   ],
+   "raw": "把惊喜派对的事说出来了",
+   "ms": 438,
+   "answer": "把惊喜派对的事说出来",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-onthefence",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal"
+   ],
+   "raw": "拿不定主意",
+   "ms": 306,
+   "answer": "拿不定主意",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "social-mybad",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "literal",
+    "after"
+   ],
+   "raw": "我的错，我",
+   "ms": 352,
+   "answer": "我的错",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "idiom-breakaleg",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal",
+    "after"
+   ],
+   "raw": "别摔着！",
+   "ms": 316,
+   "answer": "别摔着",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "idiom-cutcorners",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "work",
+    "after"
+   ],
+   "raw": "走捷径了",
+   "ms": 300,
+   "answer": "走捷径",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "idiom-alltalk",
+   "slice": "fill_en_zh",
+   "bins": [
+    "idiom",
+    "literal"
+   ],
+   "raw": "爱吹牛",
+   "ms": 318,
+   "answer": "爱吹牛",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "slang-meh",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang"
+   ],
+   "raw": "一般。",
+   "ms": 297,
+   "answer": "一般",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "context-overit-breakup",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "idiom",
+    "after"
+   ],
+   "raw": "翻篇了",
+   "ms": 310,
+   "answer": "翻篇",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "context-overit-fedup",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "idiom",
+    "after"
+   ],
+   "raw": "忍无可忍了",
+   "ms": 343,
+   "answer": "忍无可忍",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "context-whatever-food",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "social",
+    "after"
+   ],
+   "raw": "随便，你",
+   "ms": 313,
+   "answer": "随便",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "context-whatever-argue",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "social"
+   ],
+   "raw": "你总是这样，从来不听我说。",
+   "ms": 446,
+   "answer": "你总是这样，从来不听我说",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-kindof",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "after"
+   ],
+   "raw": "有点不想",
+   "ms": 246,
+   "answer": "有点",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "social-nooffense",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "literal",
+    "after"
+   ],
+   "raw": "没关系的，但你",
+   "ms": 301,
+   "answer": "没关系的",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-youdoyou",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "literal",
+    "after"
+   ],
+   "raw": "你干啥去，我",
+   "ms": 348,
+   "answer": "你干啥去",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-justsaying",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "after"
+   ],
+   "raw": "随口一说哈",
+   "ms": 267,
+   "answer": "随口一说",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-bitmuch",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social"
+   ],
+   "raw": "有点多。",
+   "ms": 372,
+   "answer": "有点多",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "social-takeyourtime",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "literal"
+   ],
+   "raw": "慢慢来",
+   "ms": 282,
+   "answer": "慢慢来",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "context-imdown",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "slang",
+    "literal",
+    "after"
+   ],
+   "raw": "我下来啦！几点",
+   "ms": 359,
+   "answer": "我下来啦",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "context-down-sad",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "literal"
+   ],
+   "raw": "没精神",
+   "ms": 307,
+   "answer": "没精神",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-catchup",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "literal",
+    "after"
+   ],
+   "raw": "补上吧",
+   "ms": 320,
+   "answer": "补上",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-notfeelingit",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "after"
+   ],
+   "raw": "没感觉就别",
+   "ms": 279,
+   "answer": "没感觉",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "social-backyou",
+   "slice": "fill_en_zh",
+   "bins": [
+    "social",
+    "literal"
+   ],
+   "raw": "有我的背",
+   "ms": 298,
+   "answer": "有我的背",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "work-followup",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after"
+   ],
+   "raw": "跟进一下",
+   "ms": 265,
+   "answer": "跟进",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-circleback",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "literal"
+   ],
+   "raw": "议。",
+   "ms": 310,
+   "answer": "议",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-submit",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after",
+    "literal"
+   ],
+   "raw": "提交报告",
+   "ms": 245,
+   "answer": "提交",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-onhold",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "literal"
+   ],
+   "raw": "搁置。",
+   "ms": 305,
+   "answer": "搁置",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-loopin",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "literal"
+   ],
+   "raw": "纳入",
+   "ms": 267,
+   "answer": "纳入",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "work-promptreply",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "literal",
+    "after"
+   ],
+   "raw": "及时回复。",
+   "ms": 260,
+   "answer": "及时回复",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-bandwidth",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after"
+   ],
+   "raw": "带宽不太",
+   "ms": 251,
+   "answer": "带宽",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-cc",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after"
+   ],
+   "raw": "借我一下",
+   "ms": 267,
+   "answer": "借",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "work-align",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "literal",
+    "after"
+   ],
+   "raw": "统一一下",
+   "ms": 236,
+   "answer": "统一",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "work-inconvenience",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "after"
+   ],
+   "raw": "造成不便。",
+   "ms": 275,
+   "answer": "造成不便",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "after-expensive",
+   "slice": "fill_en_zh",
+   "bins": [
+    "after"
+   ],
+   "raw": "贵了",
+   "ms": 246,
+   "answer": "贵",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "after-shopping",
+   "slice": "fill_en_zh",
+   "bins": [
+    "after"
+   ],
+   "raw": "购物吧",
+   "ms": 276,
+   "answer": "购物",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "after-seriously",
+   "slice": "fill_en_zh",
+   "bins": [
+    "after",
+    "literal"
+   ],
+   "raw": "认真的吗",
+   "ms": 290,
+   "answer": "认真的",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "slang-icant",
+   "slice": "fill_en_zh",
+   "bins": [
+    "slang",
+    "after",
+    "literal"
+   ],
+   "raw": "吃不了",
+   "ms": 292,
+   "answer": "吃不",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "after-always",
+   "slice": "fill_en_zh",
+   "bins": [
+    "after"
+   ],
+   "raw": "总是迟到",
+   "ms": 239,
+   "answer": "总是",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "after-left",
+   "slice": "fill_en_zh",
+   "bins": [
+    "after",
+    "pos",
+    "literal"
+   ],
+   "raw": "留在家里",
+   "ms": 246,
+   "answer": "留",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "context-free-time",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "after",
+    "pos"
+   ],
+   "raw": "有空吗",
+   "ms": 261,
+   "answer": "有空",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "context-free-cost",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "after",
+    "pos"
+   ],
+   "raw": "免费的吗",
+   "ms": 301,
+   "answer": "免费",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "after-starving",
+   "slice": "fill_en_zh",
+   "bins": [
+    "after"
+   ],
+   "raw": "饿死了",
+   "ms": 253,
+   "answer": "饿死",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "context-sick-cool",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context",
+    "slang",
+    "literal",
+    "after"
+   ],
+   "raw": "离谱了吧",
+   "ms": 325,
+   "answer": "离谱",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "context-sick-ill",
+   "slice": "fill_en_zh",
+   "bins": [
+    "context"
+   ],
+   "raw": "病倒",
+   "ms": 314,
+   "answer": "病倒",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "work-swamped",
+   "slice": "fill_en_zh",
+   "bins": [
+    "work",
+    "literal",
+    "after"
+   ],
+   "raw": "忙，明天",
+   "ms": 289,
+   "answer": "忙",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "literal-lifesaver",
+   "slice": "fill_en_zh",
+   "bins": [
+    "literal"
+   ],
+   "raw": "救星",
+   "ms": 333,
+   "answer": "救星",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "after-closeddown",
+   "slice": "fill_en_zh",
+   "bins": [
+    "after"
+   ],
+   "raw": "倒闭了",
+   "ms": 250,
+   "answer": "倒闭",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "everyday-umbrella",
+   "slice": "fill_en_zh",
+   "bins": [
+    "everyday"
+   ],
+   "raw": "伞",
+   "ms": 248,
+   "answer": "伞",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "everyday-birthday",
+   "slice": "fill_en_zh",
+   "bins": [
+    "everyday",
+    "after"
+   ],
+   "raw": "生日快乐！",
+   "ms": 240,
+   "answer": "生日快乐",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-lande",
+   "slice": "fill_zh_en",
+   "bins": [
+    "social",
+    "literal"
+   ],
+   "raw": " had too much to do.",
+   "ms": 390,
+   "answer": "had too much to do",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-gaoding",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday",
+    "after"
+   ],
+   "raw": " get it",
+   "ms": 273,
+   "answer": "get",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-mafan",
+   "slice": "fill_zh_en",
+   "bins": [
+    "social",
+    "literal",
+    "after"
+   ],
+   "raw": " bother you again",
+   "ms": 284,
+   "answer": "bother you",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-jiayou",
+   "slice": "fill_zh_en",
+   "bins": [
+    "idiom",
+    "literal"
+   ],
+   "raw": " you guys!",
+   "ms": 309,
+   "answer": "you guys",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-renao",
+   "slice": "fill_zh_en",
+   "bins": [
+    "literal",
+    "everyday"
+   ],
+   "raw": " lively.",
+   "ms": 379,
+   "answer": "lively",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-bukeqi",
+   "slice": "fill_zh_en",
+   "bins": [
+    "social",
+    "literal"
+   ],
+   "raw": "Don't be polite! I'm happy to help.",
+   "ms": 501,
+   "answer": null,
+   "check": [
+    "empty"
+   ],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-xiangshou",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday"
+   ],
+   "raw": " enjoy the trip",
+   "ms": 298,
+   "answer": "enjoy",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-chifanle",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday",
+    "literal"
+   ],
+   "raw": " had your meal yet?",
+   "ms": 331,
+   "answer": "had your meal",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-dasao",
+   "slice": "fill_zh_en",
+   "bins": [
+    "work",
+    "social",
+    "literal"
+   ],
+   "raw": "Excuse me, do",
+   "ms": 328,
+   "answer": "Excuse me",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-tucao",
+   "slice": "fill_zh_en",
+   "bins": [
+    "slang",
+    "literal"
+   ],
+   "raw": " vent about my",
+   "ms": 316,
+   "answer": "vent",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-diaoyu",
+   "slice": "fill_zh_en",
+   "bins": [
+    "pos",
+    "after"
+   ],
+   "raw": " fishing this weekend",
+   "ms": 273,
+   "answer": "fishing",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-wuliao",
+   "slice": "fill_zh_en",
+   "bins": [
+    "pos",
+    "literal"
+   ],
+   "raw": " boring.",
+   "ms": 275,
+   "answer": "boring",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-xingfen",
+   "slice": "fill_zh_en",
+   "bins": [
+    "pos",
+    "literal"
+   ],
+   "raw": " excited!!",
+   "ms": 258,
+   "answer": "excited",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-shunbian",
+   "slice": "fill_zh_en",
+   "bins": [
+    "idiom",
+    "literal"
+   ],
+   "raw": " while you're at it?",
+   "ms": 367,
+   "answer": "while you're at it",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-shoudao-email",
+   "slice": "fill_zh_en",
+   "bins": [
+    "work"
+   ],
+   "raw": " received my email",
+   "ms": 292,
+   "answer": "received",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-mingming",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday",
+    "stance"
+   ],
+   "raw": " told you",
+   "ms": 249,
+   "answer": null,
+   "check": [
+    "empty"
+   ],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-yaobu",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday",
+    "literal"
+   ],
+   "raw": "How about we just",
+   "ms": 286,
+   "answer": "How about",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-juan",
+   "slice": "fill_zh_en",
+   "bins": [
+    "slang",
+    "literal"
+   ],
+   "raw": " competitive.",
+   "ms": 290,
+   "answer": "competitive",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-haixing",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday",
+    "literal",
+    "context"
+   ],
+   "raw": "It was okay, kinda",
+   "ms": 403,
+   "answer": "It was okay",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-suibian",
+   "slice": "fill_zh_en",
+   "bins": [
+    "social",
+    "context",
+    "stance"
+   ],
+   "raw": "It's up to you.",
+   "ms": 422,
+   "answer": null,
+   "check": [
+    "empty"
+   ],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-rongxing",
+   "slice": "fill_zh_en",
+   "bins": [
+    "work",
+    "literal"
+   ],
+   "raw": " a pleasure to work",
+   "ms": 305,
+   "answer": "a pleasure",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-bangmang",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday"
+   ],
+   "raw": " your help!",
+   "ms": 264,
+   "answer": "your help",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-kaixin",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday"
+   ],
+   "raw": " happy you came!",
+   "ms": 292,
+   "answer": "happy",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-zenmeban",
+   "slice": "fill_zh_en",
+   "bins": [
+    "everyday",
+    "literal"
+   ],
+   "raw": "What to do, I",
+   "ms": 350,
+   "answer": "What to do",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-gongxi",
+   "slice": "fill_zh_en",
+   "bins": [
+    "work",
+    "social"
+   ],
+   "raw": "Congratulations on the",
+   "ms": 261,
+   "answer": "Congratulations",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "fill_en_zh-inj-cantmake",
+   "slice": "fill_en_zh",
+   "bins": [
+    "injection",
+    "context"
+   ],
+   "raw": "赶不去了",
+   "ms": 353,
+   "answer": "赶不去",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "fill_zh_en-inj-wangle",
+   "slice": "fill_zh_en",
+   "bins": [
+    "injection",
+    "everyday"
+   ],
+   "raw": " forgot to reply",
+   "ms": 355,
+   "answer": "forgot",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "naturalize_zh-youshijian",
+   "slice": "naturalize_zh",
+   "bins": [
+    "register",
+    "stiff"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 255,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_zh-haochi",
+   "slice": "naturalize_zh",
+   "bins": [
+    "stiff",
+    "translationese"
+   ],
+   "raw": "这个食物太好吃。",
+   "ms": 343,
+   "answer": "这个食物太好吃。",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-shishi",
+   "slice": "naturalize_zh",
+   "bins": [
+    "translationese"
+   ],
+   "raw": "你应该试试它。",
+   "ms": 303,
+   "answer": "你应该试试它。",
+   "check": [],
+   "hit": true,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-paidui",
+   "slice": "naturalize_zh",
+   "bins": [
+    "translationese",
+    "stance"
+   ],
+   "raw": "我今天有点忙，所以不能来参加你的派对。",
+   "ms": 469,
+   "answer": "我今天有点忙，所以不能来参加你的派对。",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-wanfan",
+   "slice": "naturalize_zh",
+   "bins": [
+    "translationese"
+   ],
+   "raw": "我已经吃晚饭了。",
+   "ms": 336,
+   "answer": "我已经吃晚饭了。",
+   "check": [],
+   "hit": false,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-shengqi",
+   "slice": "naturalize_zh",
+   "bins": [
+    "wordorder",
+    "translationese"
+   ],
+   "raw": "他看起来很生气关于这件事。",
+   "ms": 358,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_zh-xiexie-bangzhu",
+   "slice": "naturalize_zh",
+   "bins": [
+    "grammar"
+   ],
+   "raw": "谢谢你帮了忙。",
+   "ms": 356,
+   "answer": "谢谢你帮了忙。",
+   "check": [],
+   "hit": false,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-gaishijian",
+   "slice": "naturalize_zh",
+   "bins": [
+    "stiff",
+    "work",
+    "stance"
+   ],
+   "raw": "关于这个会议，我认为我们应该改变时间。",
+   "ms": 444,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_zh-chidao",
+   "slice": "naturalize_zh",
+   "bins": [
+    "stiff"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 262,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_zh-conglai",
+   "slice": "naturalize_zh",
+   "bins": [
+    "wordorder"
+   ],
+   "raw": "我没有去过那个地方。",
+   "ms": 334,
+   "answer": "我没有去过那个地方。",
+   "check": [],
+   "hit": false,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-zhuyi-hao",
+   "slice": "naturalize_zh",
+   "bins": [
+    "stiff"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 262,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_zh-kafei",
+   "slice": "naturalize_zh",
+   "bins": [
+    "register",
+    "wordorder"
+   ],
+   "raw": "我想要一杯咖啡，请给我。",
+   "ms": 407,
+   "answer": "我想要一杯咖啡，请给我。",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-daojia",
+   "slice": "naturalize_zh",
+   "bins": [
+    "translationese"
+   ],
+   "raw": "我到家的时候会给你打电话。",
+   "ms": 399,
+   "answer": "我到家的时候会给你打电话。",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-aiish-comfort",
+   "slice": "naturalize_zh",
+   "bins": [
+    "assistantese"
+   ],
+   "raw": "非常理解你的感受，希望你早日走出困境，加油！",
+   "ms": 601,
+   "answer": "非常理解你的感受，希望你早日走出困境，加油！",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_zh-wufan-overformal",
+   "slice": "naturalize_zh",
+   "bins": [
+    "register",
+    "stiff"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 264,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_en-verylike",
+   "slice": "naturalize_en",
+   "bins": [
+    "interference"
+   ],
+   "raw": "I really like this movie.",
+   "ms": 356,
+   "answer": "I really like this movie.",
+   "check": [],
+   "hit": true,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-sleepfirst",
+   "slice": "naturalize_en",
+   "bins": [
+    "interference",
+    "literal"
+   ],
+   "raw": "I'll go to sleep first.",
+   "ms": 412,
+   "answer": "I'll go to sleep first.",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-kindlyfind",
+   "slice": "naturalize_en",
+   "bins": [
+    "stiff",
+    "work"
+   ],
+   "raw": "Please find the attached file.",
+   "ms": 359,
+   "answer": "Please find the attached file.",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-disturb",
+   "slice": "naturalize_en",
+   "bins": [
+    "interference",
+    "work"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 248,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_en-addoil",
+   "slice": "naturalize_en",
+   "bins": [
+    "literal"
+   ],
+   "raw": "You can do it! Add some oil!",
+   "ms": 435,
+   "answer": "You can do it! Add some oil!",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-littletired",
+   "slice": "naturalize_en",
+   "bins": [
+    "grammar"
+   ],
+   "raw": "I'm a little bit tired.",
+   "ms": 407,
+   "answer": "I'm a little bit tired.",
+   "check": [],
+   "hit": false,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-everystep",
+   "slice": "naturalize_en",
+   "bins": [
+    "assistantese"
+   ],
+   "raw": "Absolutely! I completely understand how you feel, and I'm here for you every step of the way.",
+   "ms": 843,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_en-howtosay",
+   "slice": "naturalize_en",
+   "bins": [
+    "grammar"
+   ],
+   "raw": "How do you say this in English?",
+   "ms": 433,
+   "answer": "How do you say this in English?",
+   "check": [],
+   "hit": true,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-delicious",
+   "slice": "naturalize_en",
+   "bins": [
+    "stiff"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 264,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_en-howrecently",
+   "slice": "naturalize_en",
+   "bins": [
+    "interference"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 269,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "naturalize_en-atonce",
+   "slice": "naturalize_en",
+   "bins": [
+    "stiff",
+    "work"
+   ],
+   "raw": "I'll send it to you as soon as I'm done.",
+   "ms": 533,
+   "answer": "I'll send it to you as soon as I'm done.",
+   "check": [],
+   "hit": false,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-notonpurpose",
+   "slice": "naturalize_en",
+   "bins": [
+    "grammar"
+   ],
+   "raw": "Please don't be angry with me; I wasn't on purpose.",
+   "ms": 600,
+   "answer": "Please don't be angry with me; I wasn't on purpose.",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "naturalize_en-playwithphone",
+   "slice": "naturalize_en",
+   "bins": [
+    "interference"
+   ],
+   "raw": "I was playing with my phone the whole night.",
+   "ms": 469,
+   "answer": "I was playing with my phone the whole night.",
+   "check": [],
+   "hit": false,
+   "near": true,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "unchanged-zh01",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 255,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh03",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 247,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh05",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "我先睡了，明天聊。",
+   "ms": 357,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh07",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "你到哪儿去了？",
+   "ms": 343,
+   "answer": "你到哪儿去了？",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "unchanged-zh09",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "麻烦您看一下附件，有问题随时找我。",
+   "ms": 474,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh11",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "行，那就这么定了。",
+   "ms": 430,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh13",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "你这也太夸张了",
+   "ms": 395,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh15",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "等我五分钟。",
+   "ms": 326,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh17",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "这个方案我这边没问题。",
+   "ms": 377,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh19",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "下雨了，记得带伞。",
+   "ms": 406,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh21",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 255,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh23",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "我觉得还可以再改改。",
+   "ms": 362,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh25",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 263,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-zh27",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "zh"
+   ],
+   "raw": "这事儿我真没想到。",
+   "ms": 304,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en01",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "OMW",
+   "ms": 237,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en03",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 255,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en05",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "I'm heading to bed; talk to you tomorrow.",
+   "ms": 490,
+   "answer": "I'm heading to bed; talk to you tomorrow.",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "unchanged-en07",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 264,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en09",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 265,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en11",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 267,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en13",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 249,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en15",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "Honestly, I don't mind either way.",
+   "ms": 436,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en17",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "Happy birthday! Hope it's a good one.",
+   "ms": 460,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en19",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "I'll be there around 7.",
+   "ms": 427,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en21",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "That makes sense, thanks.",
+   "ms": 365,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en23",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 283,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "unchanged-en25",
+   "slice": "unchanged",
+   "bins": [
+    "unchanged",
+    "en"
+   ],
+   "raw": "OK, I'm down.",
+   "ms": 352,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "style-mingtianyoukong-1",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "你明天有空吗？",
+   "ms": 338,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "style-mingtianyoukong-2",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 264,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "style-shifoufangbian-1",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 248,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "style-shifoufangbian-2",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 257,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "style-freetmrw-1",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "Hey, are you free tomorrow?",
+   "ms": 377,
+   "answer": "Hey, are you free tomorrow?",
+   "check": [],
+   "hit": false,
+   "bad": true
+  },
+  {
+   "id": "style-freetmrw-2",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "Hey, are you free tomorrow?",
+   "ms": 381,
+   "answer": "Hey, are you free tomorrow?",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": false,
+   "missed": false
+  },
+  {
+   "id": "style-briefcall-1",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 291,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "style-briefcall-2",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 260,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "style-redo-1",
+   "slice": "style",
+   "bins": [
+    "directness"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 263,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "style-redo-2",
+   "slice": "style",
+   "bins": [
+    "directness"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 257,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": false,
+   "near": false,
+   "bad": true,
+   "missed": true
+  },
+  {
+   "id": "style-thanksmuch-1",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "非常感谢！",
+   "ms": 237,
+   "answer": "非常感谢",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "style-thanksmuch-2",
+   "slice": "style",
+   "bins": [
+    "register"
+   ],
+   "raw": "非常感谢！",
+   "ms": 231,
+   "answer": "非常感谢",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "p13n-za-1",
+   "slice": "p13n",
+   "bins": [
+    "p13n"
+   ],
+   "raw": "到底怎么没来",
+   "ms": 297,
+   "answer": "到底怎么",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "p13n-za-2",
+   "slice": "p13n",
+   "bins": [
+    "p13n"
+   ],
+   "raw": "咋没来",
+   "ms": 354,
+   "answer": "咋",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "p13n-ting-natural-1",
+   "slice": "p13n",
+   "bins": [
+    "p13n"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 248,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "p13n-ting-natural-2",
+   "slice": "p13n",
+   "bins": [
+    "p13n"
+   ],
+   "raw": "UNCHANGED",
+   "ms": 299,
+   "answer": "UNCHANGED",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "p13n-hate-soft-1",
+   "slice": "p13n",
+   "bins": [
+    "p13n",
+    "stance"
+   ],
+   "raw": "讨厌这个",
+   "ms": 260,
+   "answer": "讨厌",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "p13n-hate-soft-2",
+   "slice": "p13n",
+   "bins": [
+    "p13n",
+    "stance"
+   ],
+   "raw": "讨厌这个",
+   "ms": 309,
+   "answer": "讨厌",
+   "check": [],
+   "hit": true,
+   "bad": false
+  },
+  {
+   "id": "p13n-plain-en-1",
+   "slice": "p13n",
+   "bins": [
+    "p13n"
+   ],
+   "raw": " absurd.",
+   "ms": 274,
+   "answer": "absurd",
+   "check": [],
+   "hit": false,
+   "bad": false
+  },
+  {
+   "id": "p13n-plain-en-2",
+   "slice": "p13n",
+   "bins": [
+    "p13n"
+   ],
+   "raw": " absurd.",
+   "ms": 336,
+   "answer": "absurd",
+   "check": [],
+   "hit": false,
+   "bad": false
+  }
+ ]
+}

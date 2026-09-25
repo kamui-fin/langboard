@@ -137,7 +137,19 @@ def export(run_dir):
     merged = PeftModel.from_pretrained(base, os.path.join(run_dir, "adapter")).merge_and_unload()
     out = os.path.join(run_dir, "merged")
     merged.save_pretrained(out)
-    AutoTokenizer.from_pretrained(run["base"], trust_remote_code=True).save_pretrained(out)
+    tok = AutoTokenizer.from_pretrained(run["base"], trust_remote_code=True)
+    tok.save_pretrained(out)
+    # llama.cpp's Hunyuan converter takes the GGUF's end-of-generation token from config.json's
+    # eod_token_id, which for Hy-MT2 is 3 ('$'); its turns really end with the tokenizer's EOS
+    # (<｜hy_place▁holder▁no▁2｜>, as in generation_config). With the wrong one the model never stops
+    # and starts the sentence over.
+    cfg_path = os.path.join(out, "config.json")
+    cfg = json.load(open(cfg_path))
+    if tok.eos_token_id is not None:
+        for key in ("eos_token_id", "eod_token_id"):
+            if key in cfg and cfg[key] != tok.eos_token_id:
+                cfg[key] = tok.eos_token_id
+        json.dump(cfg, open(cfg_path, "w"), indent=2)
     gguf = os.path.join(run_dir, "model-f16.gguf")
     # A causal-LM load drops Qwen3.5's multi-token-prediction head (speculative decoding only, which
     # the phone doesn't use), so the converter is told not to expect it.
