@@ -43,6 +43,33 @@ teacher prompt.
   non-native speaker (Claude) and need two native Mainland reviewers: fix answers, add missing
   acceptable ones, drop cases that are unnatural, then set `reviewed: true`.
 
+## Gold v1: every task (`gold_v1/`)
+
+The handoff's other slices, in the lb1 contract (`../contract/CONTRACT.md`). Load everything, legacy Fill
+included, with `gold.load("dev")` / `gold.load("locked")` from `shared/contract/gold.py`.
+
+| Slice | Dev | Locked | Handoff target (total) |
+| --- | --- | --- | --- |
+| `fill_en_zh` | 100 + 1 injection | 150 | 100 |
+| `fill_zh_en` | 26 | 26 | 80 |
+| `naturalize_zh` | 15 | 14 | 60 |
+| `naturalize_en` | 13 | 13 | 50 |
+| `unchanged` (zh + en) | 27 | 27 | 50 |
+| `style` | 12 | 11 | 40 |
+| `p13n` | 8 | 6 | 20 |
+
+A case is `{"id", "slice", "family", "bins", "request", "good", "bad", "reviewed", "note"?}`, where
+`request` is the canonical lb1 request. Style and p13n cases come in families (the same meaning under
+several styles, or with and without a profile), and a family is always in one split. For naturalize,
+`good` lists acceptable repairs, or `["UNCHANGED"]`; `bad` lists strings whose presence is a critical
+error (an added apology, a meaning flip, UNCHANGED when the text needs fixing). The `injection` bin holds
+instruction-shaped chat lines the model must ignore. Automatic scoring of naturalize is a weak proxy; the
+native rating (`ANNOTATION.md`) is the measure.
+
+Same caveat as the Fill set: **written by Claude, `reviewed: false` everywhere**, and eight legacy Fill
+cases list a good answer that fails the contract's `check` (listed in `shared/contract/test_contract.py`,
+`LEGACY_NEEDS_REVIEW`).
+
 ## Running
 
 ```bash
