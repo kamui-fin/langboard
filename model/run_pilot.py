@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The identical pilot fine-tune (handoff §4 step 2, gpt/bakeoff_decision.md): same rows, same budget,
+"""The identical pilot fine-tune (handoff §4 step 2, artifacts/bakeoff_decision.md): same rows, same budget,
 every candidate; then each is merged, quantized to the bakeoff's Q4_K_M and scored on the dev gold
 with the lb1 prompt, next to its raw score.
 

@@ -110,11 +110,13 @@ Return JSON only:
 - "en_natural": 1-5, the same question for the English and a native American English speaker.
 - "register": one of casual_friend, casual_neutral, work_chat, professional: the chat context the sentences fit best.
 - "zh_span": the one expression in the Chinese sentence a learner of Chinese would most likely not know how to say (a verb phrase, idiom, adjective or set phrase, 1-6 characters). It MUST be copied exactly from the Chinese sentence. null if nothing fits.
-- "zh_span_en": the English words the learner would type in place of zh_span, taken from or matching the English sentence. English only.
+- "zh_span_en": the English words the learner would type in place of zh_span, copied exactly from the English sentence. English only.
 - "en_span": the one expression in the English sentence a Chinese learner of English would most likely not know how to say (1-4 words), copied exactly from the English sentence. null if nothing fits.
-- "en_span_zh": the Chinese the learner would type in place of en_span. Chinese only.
-- "zh_learner": the Chinese sentence as an English-speaking intermediate learner might write it: same meaning and tone, but with typical learner problems (word-for-word translation from English, wrong measure word, stiff or textbook wording, 的/了 misuse, word order). Must differ from the original. Never add or drop meaning.
-- "en_learner": the English sentence as a Chinese-speaking intermediate learner might write it (Chinese-English interference, missing articles, wrong tense, stiff wording). Must differ from the original. Never add or drop meaning.
+- "en_span_zh": the Chinese the learner would type in place of en_span, copied exactly from the Chinese sentence. Chinese only.
+- "zh_learner": the Chinese sentence as an English-speaking intermediate learner might write it: same meaning and tone, but with typical learner problems (word-for-word translation from English, wrong measure word, stiff or textbook wording, 的/了 misuse, word order). It must be clearly worse: something a native speaker would correct, not just another acceptable way to say it. Never add or drop meaning.
+- "zh_learner_natural": 1-5, how natural zh_learner is, on the same scale as zh_natural.
+- "en_learner": the English sentence as a Chinese-speaking intermediate learner might write it (Chinese-English interference, missing articles, wrong tense, stiff wording). It must be clearly worse: something a native speaker would correct. Never add or drop meaning.
+- "en_learner_natural": 1-5, how natural en_learner is, on the same scale as en_natural.
 """
 
 SCHEMA = {
@@ -124,9 +126,11 @@ SCHEMA = {
         "register": {"type": "string", "enum": ["casual_friend", "casual_neutral", "work_chat", "professional"]},
         "zh_span": {"type": ["string", "null"]}, "zh_span_en": {"type": ["string", "null"]},
         "en_span": {"type": ["string", "null"]}, "en_span_zh": {"type": ["string", "null"]},
-        "zh_learner": {"type": "string"}, "en_learner": {"type": "string"},
+        "zh_learner": {"type": "string"}, "zh_learner_natural": {"type": "integer"},
+        "en_learner": {"type": "string"}, "en_learner_natural": {"type": "integer"},
     },
-    "required": ["zh_natural", "en_natural", "register", "zh_span", "zh_span_en", "en_span", "en_span_zh", "zh_learner", "en_learner"],
+    "required": ["zh_natural", "en_natural", "register", "zh_span", "zh_span_en", "en_span", "en_span_zh", "zh_learner",
+                 "zh_learner_natural", "en_learner", "en_learner_natural"],
 }
 
 
@@ -182,20 +186,28 @@ def rows_for(a):
     style = Style(register=reg)
     out = {}
     zh_ok, en_ok = ann.get("zh_natural", 0) >= 4, ann.get("en_natural", 0) >= 4
-    if zh_ok and ann.get("zh_span") and ann.get("zh_span_en") and not CJK.search(ann["zh_span_en"]):
+    # Fragments must come from the other human sentence: the teacher aligns, it doesn't write.
+    if zh_ok and ann.get("zh_span") and ann.get("zh_span_en") and not CJK.search(ann["zh_span_en"]) \
+            and ann["zh_span_en"].strip().lower() in en.lower():
         parts = span_parts(zh, ann["zh_span"])
         if parts:
             req = Request(task="fill", source_locale=EN, target_locale=ZH, before=parts[0], fragment=ann["zh_span_en"].strip(), after=parts[1], style=style)
             out["fill_en_zh"] = (req, ann["zh_span"])
-    if en_ok and ann.get("en_span") and ann.get("en_span_zh") and CJK.search(ann["en_span_zh"]) and not re.search("[A-Za-z]", ann["en_span_zh"]):
+    if en_ok and ann.get("en_span") and ann.get("en_span_zh") and CJK.search(ann["en_span_zh"]) and not re.search("[A-Za-z]", ann["en_span_zh"]) \
+            and ann["en_span_zh"].strip() in zh:
         parts = span_parts(en, ann["en_span"])
         if parts:
             req = Request(task="fill", source_locale=ZH, target_locale=EN, before=parts[0], fragment=ann["en_span_zh"].strip(), after=parts[1], style=style)
             out["fill_zh_en"] = (req, ann["en_span"])
     zl, el = (ann.get("zh_learner") or "").strip(), (ann.get("en_learner") or "").strip()
-    if zh_ok and zl and zl != zh and CJK.search(zl) and SequenceMatcher(None, zl, zh).ratio() >= 0.4:
+    # A repair row only when the input is clearly worse than the human target: otherwise it teaches
+    # Naturalize to swap one acceptable wording for another, the restraint failure we must fix.
+    worse = lambda orig, learner: ann.get(orig, 0) - ann.get(learner, 5) >= 2 and ann.get(learner, 5) <= 2
+    if zh_ok and zl and zl != zh and CJK.search(zl) and SequenceMatcher(None, zl, zh).ratio() >= 0.4 \
+            and worse("zh_natural", "zh_learner_natural"):
         out["naturalize_zh"] = (Request(task="naturalize", target_locale=ZH, text=zl, style=style), zh)
-    if en_ok and el and el.lower() != en.lower() and not CJK.search(el) and SequenceMatcher(None, el.lower(), en.lower()).ratio() >= 0.4:
+    if en_ok and el and el.lower() != en.lower() and not CJK.search(el) and SequenceMatcher(None, el.lower(), en.lower()).ratio() >= 0.4 \
+            and worse("en_natural", "en_learner_natural"):
         out["naturalize_en"] = (Request(task="naturalize", target_locale=EN, text=el, style=style), en)
     if ann.get("zh_natural", 0) >= 5:
         out["unchanged_zh"] = (Request(task="naturalize", target_locale=ZH, text=zh, style=style), UNCHANGED)

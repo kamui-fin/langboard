@@ -19,3 +19,4 @@ shared/eval/hymt_eval/build/
 model/runs/
 model/.llama-cuda/
 model/data/raw/
+model/data/work/
