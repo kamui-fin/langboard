@@ -1,0 +1,10 @@
+{"sentence": "我非常喜欢这个电影", "register": "casual"}
+{"sentence": "我们一起说话吧", "register": "casual"}
+{"sentence": "我是很累", "register": "casual"}
+{"sentence": "我昨天看一本电影", "register": "neutral"}
+{"sentence": "我会打电话给你明天", "register": "neutral"}
+{"sentence": "很多的人在这里", "register": "neutral"}
+{"sentence": "今天天气很好，我们去公园吧", "register": "casual"}
+{"sentence": "你吃饭了吗", "register": "casual"}
+{"sentence": "请问您明天下午有空吗", "register": "formal", "chat": [["them", "您好，关于合同的事情我们需要再沟通一下"]]}
+{"sentence": "我觉得这个主意是很好的", "register": "casual"}

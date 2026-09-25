@@ -1,0 +1,16 @@
+# OS and editors
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+
+# Claude Code: per-user settings stay local (shared .claude/settings.json is committed)
+.claude/settings.local.json
+
+# Python tooling
+__pycache__/
+*.py[cod]
+.venv/
+
+# Host build of the phone engine for evals
+shared/eval/hymt_eval/build/

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- History holds phrases from the user's conversations; it stays on this device. -->
+<data-extraction-rules>
+    <!-- The dictionary is re-downloadable; don't put tens of MB into backups or transfers. -->
+    <cloud-backup>
+        <exclude domain="file" path="dictionary/" />
+        <exclude domain="database" path="history.db" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="dictionary/" />
+        <exclude domain="database" path="history.db" />
+    </device-transfer>
+</data-extraction-rules>

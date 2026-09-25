@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- The dictionary is re-downloadable; don't put tens of MB into backups. -->
+    <exclude domain="file" path="dictionary/" />
+    <!-- History holds phrases from the user's conversations; it stays on this device. -->
+    <exclude domain="database" path="history.db" />
+</full-backup-content>

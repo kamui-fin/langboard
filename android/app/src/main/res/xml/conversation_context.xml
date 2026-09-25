@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Read-only and on demand: no event types are acted on, nothing is drawn, no text is changed.
+     Window content is read only when the Langboard keyboard is invoked; see ConversationContextService. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeViewFocused"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/context_description"
+    android:isAccessibilityTool="false"
+    android:notificationTimeout="1000"
+    android:settingsActivity="app.langboard.MainActivity" />

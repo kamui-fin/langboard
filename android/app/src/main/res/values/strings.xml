@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Langboard</string>
+    <string name="ime_name">Langboard</string>
+    <string name="subtype_en_zh">English → Mandarin</string>
+    <string name="context_label">Langboard Conversation Context</string>
+    <string name="context_description">When you switch to the Langboard keyboard, Langboard reads the text on screen, so its suggestions fit the conversation and it can explain the latest message you received. It reads nothing at any other time, never changes text and never draws on screen. Everything is processed on your device and never sent anywhere. Password fields, sign-in and payment screens, and banking, wallet and password-manager apps are skipped.</string>
+    <string name="process_text_label">Langboard</string>
+</resources>

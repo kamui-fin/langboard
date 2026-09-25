@@ -1,0 +1,50 @@
+{
+  "version": "v4-continue",
+  "chat_template": "<｜hy_begin▁of▁sentence｜><｜hy_User｜>{user}<｜hy_Assistant｜>",
+  "speakers": {
+    "them": "对方：",
+    "me": "我：",
+    "other": ""
+  },
+  "styles": {
+    "casual": "口语化、随意的朋友聊天",
+    "neutral": "自然的日常聊天",
+    "formal": "礼貌、正式的工作沟通"
+  },
+  "fill": {
+    "format": "continue",
+    "template": "【背景信息】\n{context}\n\n请结合背景信息将以下文本翻译为中文。注意翻译的风格要严格符合【{style}】，只需要输出翻译后的结果，不要额外解释。\n\n【待翻译文本】\n{draft}",
+    "template_no_context": "将以下文本翻译为中文。注意翻译的风格要严格符合【{style}】，只需要输出翻译后的结果，不要额外解释。\n\n{draft}",
+    "context": "聊天记录：\n{chat}",
+    "screen_chars": 240,
+    "beams": 10,
+    "max_tokens": 12,
+    "length_alpha": 0.0,
+    "rescore": 0,
+    "after_chars": 3,
+    "end_mark": "。",
+    "pin_first": false
+  },
+  "explain": {
+    "template": "[Background Information]\n{context}\n\nPlease translate the following text into English, taking the provided background information into consideration. Only output the translated result without any additional explanation.\n\n[Source Text]\n{message}",
+    "template_no_context": "Translate the following text into English. Note that you should only output the translated result without any additional explanation:\n\n{message}",
+    "context": "{chat}",
+    "speakers": {
+      "them": "Them: ",
+      "me": "Me: ",
+      "other": ""
+    },
+    "screen_chars": 240,
+    "max_tokens": 64,
+    "repeat_penalty": 1.05
+  },
+  "check": {
+    "template": "【背景信息】\n{context}\n\n请结合背景信息将以下文本改写为更地道、自然的中文。注意风格要严格符合【{style}】，只需要输出改写后的结果，不要额外解释。\n\n【待改写文本】\n{sentence}",
+    "context": "聊天记录：\n{chat}",
+    "template_no_context": "请将以下文本改写为更地道、自然的中文。注意风格要严格符合【{style}】，只需要输出改写后的结果，不要额外解释。\n\n{sentence}",
+    "screen_chars": 240,
+    "beams": 4,
+    "max_tokens": 64,
+    "length_alpha": 0.6
+  }
+}
