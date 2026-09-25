@@ -139,6 +139,10 @@ class Parse(unittest.TestCase):
         self.assertEqual(parse(r, " UNCHANGED\n"), UNCHANGED)
         self.assertEqual(parse(r, "我刚到家"), UNCHANGED)
         self.assertEqual(parse(r, "刚到家"), "刚到家")
+        self.assertEqual(parse(r, "我刚到家。"), UNCHANGED)
+        self.assertEqual(parse(r, "我刚到家啊"), "我刚到家啊")  # a particle is the user's voice: an edit
+        en = Request(task="naturalize", target_locale="en-US", text="that's wild")
+        self.assertEqual(parse(en, "That’s wild."), UNCHANGED)
 
 
 class Check(unittest.TestCase):

@@ -209,7 +209,7 @@ def parse(r, completion):
     when the model said so or returned the input unchanged."""
     if r.task == "naturalize":
         out = completion.strip()
-        if out == UNCHANGED or out == r.text.strip():
+        if out == UNCHANGED or same_words(out, r.text):
             return UNCHANGED
         return out
     text = completion
@@ -220,6 +220,12 @@ def parse(r, completion):
             return None
         text = text[:i]
     return text.strip() or None
+
+
+def same_words(a, b):
+    """Equal but for punctuation, spacing, case and quote style: not worth showing as a repair."""
+    key = lambda s: "".join(c for c in s.lower() if c.isalnum())
+    return key(a) == key(b)
 
 
 def gap_end(text, after, en):
