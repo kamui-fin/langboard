@@ -10,3 +10,4 @@ ascend,https://huggingface.co/datasets/CAiRE/ASCEND,Lovenia et al. (HKUST),CC BY
 lccc,https://huggingface.co/datasets/thu-coai/lccc,THU-COAI (Weibo),MIT repo; scraped Weibo text,2026-09-25,research reference only,none,no,red,Scraped social media
 kdconv,https://huggingface.co/datasets/thu-coai/kd_conv_with_kb,THU-COAI,Apache-2.0,2026-09-25,possible,none,possible,green,Stiff knowledge-chat register; low value
 jfleg,https://huggingface.co/datasets/jhu-clsp/jfleg,Napoles et al.,CC BY-NC-SA 4.0,2026-09-25,eval design reference,none,no,red,English fluency rewrites
+langboard-smoke,model/smoke_rows.jsonl,Langboard,internal,2026-09-25,pipeline smoke tests only,none,no (smoke test only),red,Trivial rows to test training mechanics; never in a checkpoint that ships

@@ -14,3 +14,6 @@ __pycache__/
 
 # Host build of the phone engine for evals
 shared/eval/hymt_eval/build/
+
+# Training runs: adapters, merged weights, GGUFs
+model/runs/
