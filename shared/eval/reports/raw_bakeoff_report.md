@@ -1,6 +1,6 @@
 # Raw bakeoff: Hy-MT2-1.8B vs Qwen3.5-2B vs TranslateGemma 4B (dev)
 
-*25 Sep 2026 · handoff §4 step 1 · `shared/eval/bakeoff.py`, gold dev split (100 legacy Fill + 102 gold_v1) · both Q4_K_M, host CPU, greedy · outputs: `raw_dev_hymt2-q4.json`, `raw_dev_qwen35-q4.json`, `raw_dev_translategemma4b-q4.json`*
+*25 Sep 2026 · handoff §4 step 1 · `shared/eval/bakeoff.py`, gold dev split (100 legacy Fill + 102 gold_v1) · both Q4_K_M, host CPU, greedy · outputs: `raw_dev_hymt2-q4.json`, `raw_dev_qwen35-q4.json`, `raw_dev_translategemma4b-q4.json`, and `raw_locked_*.json`*
 
 Each raw model gets its best native prompt: Hy-MT2 its own translation templates from `prompts.json`
 (plus a "keep it if already natural" line for Naturalize), TranslateGemma its translation template for
@@ -18,6 +18,18 @@ continues the draft from the text before the gap in all three.
 | UNCHANGED (27) | 6 | **21** | **26** | 1 | 14 | 13 |
 | Style (12) | 2 | 5 | 5 | 4 | 2 | 4 |
 | Personalization (8) | 3 | 3 | **7** | 0 | 2 | 2 |
+
+**Locked split** (150 legacy Fill + 97 gold_v1; run once for this baseline report) shows the same pattern:
+
+| Slice (n) | Hy-MT2 hit / crit | Qwen3.5 hit / crit | TranslateGemma 4B hit / crit |
+| --- | --- | --- | --- |
+| Fill EN→ZH (150) | **86** / 3 | 70 / 12 | 65 / 3 (32 broke the sentence) |
+| Fill ZH→EN (26) | **16** / 2 | 9 / 1 | 13 / 1 |
+| Naturalize ZH (14) | 1 / 1 | 1 / 6 | **6** / 1 |
+| Naturalize EN (13) | 5 / 0 | 5 / 3 | 4 / 0 |
+| UNCHANGED (27) | 3 / **24** | **25** / 2 | 12 / 15 |
+| Style (11) | 2 / 3 | 5 / 2 | 3 / 4 |
+| Personalization (6) | 3 / 0 | **6** / 0 | 3 / 1 |
 
 *hit* = contains a listed good answer; *near* = within 0.8 similarity of one; *critical* = a listed
 prohibited reading, rewriting an UNCHANGED case, or saying UNCHANGED when the text needs repair.
@@ -50,7 +62,7 @@ answers (§4 step 2). Nothing here settles it.
 ## Caveats
 
 - Gold is Claude-written and unreviewed; automatic scores are proxies (ANNOTATION.md is the measure).
-- Dev split only; the locked split is for the final baseline report.
+- Both splits are Claude-written; the locked numbers are this baseline's reference, not a release score.
 - Raw prompts differ by necessity; a better Qwen Fill prompt could narrow the gap.
 - Greedy first answer only. The shipped Fill pipeline adds beams, which rescue some cases.
 
