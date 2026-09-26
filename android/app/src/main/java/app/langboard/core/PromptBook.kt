@@ -16,9 +16,17 @@ import org.json.JSONObject
  */
 class PromptBook(
   val version: String,
+  /**
+   * `hymt`: Hy-MT2's own translation prompts below, with the register's style phrase and, when the
+   * user changed a My Style control, [styleHints]. `lb1`: the trained contract's user turn ([Lb1]),
+   * which also carries profile lines and examples; the templates below are then only used for Explain.
+   */
+  val contract: String = "hymt",
   private val chatTemplate: String,
   private val speakers: Map<ScreenLine.Align, String>,
   private val styles: Map<Register, String>,
+  /** Added to the style phrase for a control away from its default, e.g. "concise" → 简短. Missing keys add nothing. */
+  private val styleHints: Map<String, String> = emptyMap(),
   val fill: Fill,
   val explain: Explain,
   val check: Check,
@@ -67,10 +75,23 @@ class PromptBook(
   /** The sentence as the user is writing it, with the English in place. */
   fun draft(r: FillGapRequest): String = "${r.before}${r.fragment}${r.after}".trim()
 
+  val isLb1: Boolean get() = contract == Lb1.VERSION
+
+  /** The style phrase for Hy-MT2: the register's, then a hint for each control the user moved off its default. */
+  fun style(register: Register, p: PersonalStyle): String {
+    val hints = listOfNotNull(
+      p.slang.takeIf { it != Slang.Low }?.let { styleHints["slang_${it.lb1}"] },
+      p.verbosity.takeIf { it != Verbosity.Balanced }?.let { styleHints[it.lb1] },
+      p.directness.takeIf { it != Directness.Balanced }?.let { styleHints[it.lb1] },
+    ).filter { it.isNotBlank() }
+    return (listOf(styles.getValue(register)) + hints).joinToString("，")
+  }
+
   /** The fill prompt, ending with the Chinese before the gap already written as the answer. */
   fun fill(r: FillGapRequest): String {
+    if (isLb1) return turn(Lb1.fill(r)) + Lb1.fillPrefill(r)
     val chat = recent(r.screen, speakers, fill.screenChars)
-    val style = styles.getValue(r.register)
+    val style = style(r.register, r.personal)
     val user =
       if (chat.isEmpty()) vars(fill.templateNoContext, "style" to style, "draft" to draft(r))
       else vars(fill.template, "context" to vars(fill.context, "chat" to chat), "style" to style, "draft" to draft(r))
@@ -85,9 +106,10 @@ class PromptBook(
     )
   }
 
-  fun check(sentence: String, register: Register, screen: ScreenText): String {
+  fun check(sentence: String, register: Register, screen: ScreenText, personal: PersonalStyle = PersonalStyle.NONE): String {
+    if (isLb1) return turn(Lb1.naturalize(sentence, register, personal, screen))
     val chat = recent(screen, speakers, check.screenChars)
-    val style = styles.getValue(register)
+    val style = style(register, personal)
     return turn(
       if (chat.isEmpty()) vars(check.templateNoContext, "style" to style, "sentence" to sentence)
       else vars(check.template, "context" to vars(check.context, "chat" to chat), "style" to style, "sentence" to sentence)
@@ -105,9 +127,11 @@ class PromptBook(
       val c = o.getJSONObject("check")
       return PromptBook(
         version = o.optString("version", "?"),
+        contract = o.optString("contract", "hymt"),
         chatTemplate = o.getString("chat_template"),
         speakers = speakers(o.getJSONObject("speakers")),
         styles = o.getJSONObject("styles").let { s -> Register.entries.associateWith { s.getString(it.promptName) } },
+        styleHints = o.optJSONObject("style_hints")?.let { h -> h.keys().asSequence().associateWith { h.getString(it) } }.orEmpty(),
         fill = Fill(
           template = f.getString("template"),
           templateNoContext = f.getString("template_no_context"),

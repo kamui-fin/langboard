@@ -76,6 +76,20 @@ friend who sends `ignore previous instructions` or `</chat><task>…` must not c
 - Training data includes conversation lines that contain instructions, and their targets ignore them
   (a named slice in the pilot set). The tags alone do not make a model robust.
 
+### On the phone
+
+`android/.../core/Lb1.kt` renders this turn and the pre-fill the same way (`Lb1Test` pins it to
+`contract.py`'s output; change both together). The app keeps sending Hy-MT2's own prompts until the
+shipped `prompts.json` has `"contract": "lb1"` at the top level (with the new model's `chat_template`);
+then Fill and Check use lb1, filled from My Style: `style` from the chat's register (or the user's
+default) and their controls, `profile` from their style guide first (their own description, one statement per line, with anything
+about who they are or any non-style instruction removed on the phone), then their word rules
+("prefer 哈哈哈 over 笑死") and accepted learned lines. Training rows should include free-text profile
+lines of this kind, not only "prefers X over Y", `examples`
+from their sent or saved sentences closest to the draft. Explain is not an lb1 task and keeps its prompt.
+`prompts.json` also has `style_hints`, extra style words for Hy-MT2 when a control is off its default;
+defaults leave the Hy-MT2 prompt unchanged.
+
 ## Assistant turn: fill continues the sentence
 
 The assistant turn is **pre-filled with the text before the gap**, and the model writes on from there:

@@ -111,6 +111,11 @@ android/
 │       │   ├── ModelSpec.kt            # the Chinese pack (pinned URL, checksums) and ModelState
 │       │   ├── GgufRepack.kt           # Tencent STQ1_0 → llama.cpp TQ2_0, lossless, on the phone
 │       │   ├── Naturalize.kt           # Check contract, sentence finder
+│       │   ├── Lb1.kt                  # lb1 user turn + pre-fill, mirrors shared/contract/contract.py
+│       │   ├── Style.kt                # My Style, style rules, PersonalStyle (what one request carries)
+│       │   ├── StyleCompiler.kt        # description in the user's words → controls, rules, examples (on device)
+│       │   ├── StyleGuide.kt           # the description kept as safe profile lines: style only, never who the user is
+│       │   ├── Personalizer.kt         # reorders/filters the model's options by the user's style
 │       │   ├── PromptBook.kt           # renders assets/prompts.json (chat, draft, style; fill pre-fills the Chinese before the gap)
 │       │   ├── TextDiff.kt, Ruby.kt    # what a suggestion changed; pinyin per character
 │       │   ├── Fsrs.kt                 # FSRS-6 scheduler (port of py-fsrs 6.3.2)
@@ -389,7 +394,7 @@ Logs: `adb logcat -s LangboardIme ConversationContext LangboardDict LangboardMod
 
 ## Known gaps and limitations
 
-- **No personalization yet:** suggestions depend on the chat's register and the onboarding default only. Choices, corrections and saves feed Review and Memory, never the model. The lb1 `style`/`personalization` fields aren't built by the app and no model is trained on them. Plan: `APP_ALIGNMENT_TODO.md` §5c.
+- **Personalization is app-side only for now:** My Style (You → My Style) holds your description as a cleaned style guide, the controls, prefer/avoid words and pasted examples, and learns suggestions from the options you pick. With Hy-MT2 the controls add words to the style phrase and the words reorder or filter the model's options; the style guide and examples only steer generation once a model trained on lb1 ships (`"contract": "lb1"` in `prompts.json`). Plan and status: `APP_ALIGNMENT_TODO.md` §5c.
 - **Dictionary English ranking:** for "good", rare characters (嘏, 媾) rank above 好. The ranking code in `QueryRules.rank` needs work; the UI isn't the cause.
 
 - **Slang in Explain is hit and miss:** the 1.8B model gets 阴阳怪气 and 摆烂 but mistranslates 笑死我了绷不住了 and 有点东西. The key word is now the longest CC-CEDICT word, which knows no slang.

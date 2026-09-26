@@ -15,6 +15,8 @@ data class FillGapRequest(
   val register: Register = Register.Neutral,
   /** The text on screen around the field, line by line with who sent it, when the user allows it. In memory only. */
   val screen: ScreenText = ScreenText.EMPTY,
+  /** What the user told Langboard about how they want to sound, and a few of their own sentences. */
+  val personal: PersonalStyle = PersonalStyle.NONE,
 )
 
 data class FillGapResult(

@@ -56,10 +56,14 @@ import app.langboard.core.Term
 import app.langboard.dictionary.DictionaryManager
 import app.langboard.dictionary.OpenDictionary
 import app.langboard.dictionary.Readings
+import app.langboard.core.MyStyle
+import app.langboard.core.PersonalStyle
+import app.langboard.core.Personalizer
 import app.langboard.history.HistoryEntry
 import app.langboard.history.HistoryKind
 import app.langboard.history.HistoryStore
 import app.langboard.history.Outcome
+import app.langboard.history.StyleEvidence
 import app.langboard.ui.theme.LangboardTheme
 import app.langboard.billing.Subscription
 import kotlinx.coroutines.CoroutineScope
@@ -137,6 +141,12 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
   /** Checked sentences for this field, so moving the caret doesn't run the model again. */
   private data class CheckOutcome(val result: NaturalizeResult?)
   private val checks = HashMap<String, CheckOutcome>()
+  /** What history says about the user's choices, rebuilt in the background after it changes; a lookup uses whatever is ready. */
+  @Volatile private var evidence: StyleEvidence? = null
+  private var evidenceVersion = -1
+  private var evidenceJob: Job? = null
+  /** My Style, re-read each time the keyboard shows. */
+  private var myStyle = MyStyle()
 
   /**
    * Screen text read once per invocation (switching here), not per caret move: the screen doesn't
@@ -243,6 +253,8 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
     reading = ReadingPrefs(pinyin = settings.showPinyin, toneColors = settings.toneColors)
     dynamicColor = settings.colorSource == LangboardSettings.ColorSource.DEVICE
     optionCount = settings.optionCount
+    myStyle = settings.myStyle
+    refreshEvidence()
     // A restart on the same field keeps what's on screen; edits are re-verified anyway.
     val keep = sameFieldRestart && state !is ImeState.Idle
     if (!keep) refresh()
@@ -370,7 +382,10 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
           val ctx = chatContext()
           val result = runCatching {
             withTimeoutOrNull(GENERATION_TIMEOUT_MS) {
-              withContext(Dispatchers.Default) { CheckOutcome(naturalizer.review(sentence.sentence, mode, ctx.style, ctx.screen)) }
+              withContext(Dispatchers.Default) {
+                val personal = personal(sentence.sentence)
+                CheckOutcome(naturalizer.review(sentence.sentence, mode, ctx.style, ctx.screen, personal)?.let { Personalizer.check(it, myStyle.rules) })
+              }
             }
           }
           ensureActive()
@@ -397,6 +412,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
       val ctx = chatContext()
       val request = FillGapRequest(
         d.contextBefore, d.fragment, d.contextAfter, register = ctx.style, screen = ctx.screen,
+        personal = personal(d.contextBefore + d.contextAfter),
       )
       val prompt = runCatching { ModelManager.prompts().fill(request) }.getOrNull()
       cache[request]?.let { state = ImeState.Suggestions(d, it, ctx, prompt); recordFill(d, it, ctx); return@launch }
@@ -420,7 +436,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
       result.exceptionOrNull()?.let { Log.w(TAG, "fill failed: ${it.javaClass.name}: ${it.message}") }
       val waiting = state.let { it is ImeState.Working || (it is ImeState.Suggestions && it.detection == d && it.result.more) }
       if (mySession != session || !waiting) return@launch
-      val answer = result.getOrNull()
+      val answer = result.getOrNull()?.let { Personalizer.fill(it, myStyle.rules, evidence?.usualFor(d.fragment)) }
       state = result.fold(
         onSuccess = { if (answer == null) ImeState.NoMatch(d, modelMissing = !ModelManager.state.value.installed) else ImeState.Suggestions(d, answer, ctx, prompt).also { cache[request] = answer } },
         onFailure = { ImeState.Error },
@@ -438,6 +454,21 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
           cache[request] = meant
         }
       }
+    }
+  }
+
+  /** My Style for one request, with the user's own sentences most like [draft]. */
+  private fun personal(draft: String): PersonalStyle =
+    PersonalStyle.of(myStyle, evidence?.examples(draft, myStyle.examples) ?: myStyle.examples.take(MyStyle.MAX_EXAMPLES))
+
+  /** Rebuilds [evidence] from history when it has changed since the last build. Main thread only. */
+  private fun refreshEvidence() {
+    val version = history.version.value
+    if (version == evidenceVersion || evidenceJob?.isActive == true) return
+    evidenceJob = historyScope.launch {
+      val entries = runCatching { history.list(limit = EVIDENCE_ENTRIES) }.getOrNull() ?: return@launch
+      evidence = StyleEvidence(entries)
+      evidenceVersion = version
     }
   }
 
@@ -653,7 +684,11 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
 
   private fun outcome(o: Outcome, used: String? = null, sentence: String? = null) {
     val id = entryId ?: return
-    historyScope.launch { history.setOutcome(id.await(), o, used, sentence) }
+    historyScope.launch {
+      history.setOutcome(id.await(), o, used, sentence)
+      // A choice is what the user's usual answers are learned from.
+      withContext(Dispatchers.Main) { refreshEvidence() }
+    }
   }
 
   /** Saving works with history off too: saving is the user asking to keep this one. */
@@ -716,5 +751,7 @@ class LangboardImeService : InputMethodService(), LifecycleOwner, SavedStateRegi
     /** Includes loading the model from storage after a cold start (about 5 s on a Pixel 6a). */
     const val GENERATION_TIMEOUT_MS = 15_000L
     const val CONTEXT_TIMEOUT_MS = 400L
+    /** History read for what the user tends to choose; the newest are enough. */
+    const val EVIDENCE_ENTRIES = 2000
   }
 }

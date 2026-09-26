@@ -35,6 +35,10 @@ import app.langboard.R
 import app.langboard.core.LangboardSettings
 import app.langboard.history.Insights
 import app.langboard.history.Strength
+import app.langboard.history.StyleEvidence
+import app.langboard.core.Directness
+import app.langboard.core.Slang
+import app.langboard.core.Verbosity
 import kotlin.math.roundToInt
 
 /**
@@ -45,7 +49,8 @@ import kotlin.math.roundToInt
 fun YouScreen(nav: Navigator, modifier: Modifier = Modifier) {
   val snap = rememberSnapshot()
   val context = LocalContext.current
-  val tuned = remember { LangboardSettings(context).review.params != null }
+  val settings = remember { LangboardSettings(context) }
+  val tuned = remember { settings.review.params != null }
 
   Column(modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 32.dp)) {
     ScreenTitle("Your Chinese", "Built from what you actually tried to say.")
@@ -53,8 +58,8 @@ fun YouScreen(nav: Navigator, modifier: Modifier = Modifier) {
       val i = snap.insights
       Panel(Modifier.padding(horizontal = 16.dp).padding(top = 8.dp)) {
         Row {
-          Stat("${i.moments.size}", "moments", Modifier.weight(1f))
-          Stat("${i.expressions.size}", "expressions", Modifier.weight(1f))
+          Stat("${i.moments.size}", "lookups", Modifier.weight(1f))
+          Stat("${i.expressions.size}", "phrases", Modifier.weight(1f))
           Stat("${i.canSay.size}", "you can say now", Modifier.weight(1f))
         }
         if (i.expressions.isNotEmpty()) {
@@ -80,22 +85,20 @@ fun YouScreen(nav: Navigator, modifier: Modifier = Modifier) {
         }
       }
 
-      val registerTotal = i.registers.sumOf { it.second }
-      val showRegister = registerTotal >= MIN_FOR_PATTERN
-      if (showRegister || i.apps.isNotEmpty()) {
-        YouSection("How you write")
-        Column(Modifier.padding(horizontal = ScreenGutter), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-          // One chat isn't a pattern: say nothing until there are enough.
-          if (showRegister) i.registers.first().let { (register, n) ->
-            Fact("Mostly ${register.lowercase()} chats", "${(100.0 * n / registerTotal).roundToInt()}% of the $registerTotal chats Langboard read")
-          }
-          if (i.apps.isNotEmpty()) {
-            Fact(
-              "Where you get stuck",
-              i.apps.take(3).joinToString(" · ") { (pkg, n) -> "${appName(pkg) ?: "other apps"} $n" },
-            )
-          }
-        }
+      val style = remember(snap) { settings.myStyle }
+      val sound = remember(snap) { settings.defaultRegister }
+      val suggestions = remember(snap, style) { StyleEvidence(snap.entries).proposals(style).size }
+      SettingsGroup(label = null, modifier = Modifier.padding(top = 16.dp)) {
+        NavLink(
+          R.drawable.ic_person, "My Style",
+          listOfNotNull(
+            sound.choice, style.verbosity.takeIf { it != Verbosity.Balanced }?.label,
+            style.directness.takeIf { it != Directness.Balanced }?.label,
+            if (style.slang == Slang.Medium) "some slang" else null,
+            (style.guide.size + style.rules.size).takeIf { it > 0 }?.let { plural(it, "line") },
+            suggestions.takeIf { it > 0 }?.let { plural(it, "suggestion") },
+          ).joinToString(" · "),
+        ) { nav.open(Page.MyStyle) }
       }
 
       if (i.reviewCount > 0) {
@@ -180,6 +183,3 @@ private fun NavLink(icon: Int, title: String, summary: String, onClick: () -> Un
     }
   }
 }
-
-/** Lookups that read the chat, before we describe a pattern in them. */
-private const val MIN_FOR_PATTERN = 5

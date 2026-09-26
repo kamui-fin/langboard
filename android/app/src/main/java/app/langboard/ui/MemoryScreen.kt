@@ -34,16 +34,20 @@ import app.langboard.history.Expression
 import app.langboard.history.HistoryEntry
 import app.langboard.history.HistoryKind
 
-private enum class Shelf(val label: String) { Expressions("Expressions"), Moments("Moments"), Saved("Saved") }
+private enum class Shelf(val label: String, val hint: String) {
+  Phrases("Phrases", "Chinese you've needed, once per phrase"),
+  History("History", "Every time you asked, newest first"),
+  Saved("Saved", "What you starred, practiced first"),
+}
 
 /**
- * Everything Langboard has helped you say. Expressions are the Chinese you picked up, one each;
- * Moments are the times you asked, as they happened; Saved is what you starred.
+ * Everything Langboard has helped you say. Phrases are the Chinese you picked up, one each (an
+ * [Expression] in code); History is the times you asked, as they happened; Saved is what you starred.
  */
 @Composable
 fun MemoryScreen(nav: Navigator, modifier: Modifier = Modifier) {
   val snap = rememberSnapshot()
-  var shelf by rememberSaveable { mutableStateOf(Shelf.Expressions) }
+  var shelf by rememberSaveable { mutableStateOf(Shelf.Phrases) }
   var query by remember { mutableStateOf(TextFieldValue()) }
   val q = query.text.trim().lowercase()
 
@@ -59,7 +63,7 @@ fun MemoryScreen(nav: Navigator, modifier: Modifier = Modifier) {
         "Memory",
         snap?.insights?.let { i ->
           if (i.expressions.isEmpty()) "Everything Langboard helps you say, kept on this phone."
-          else "${plural(i.expressions.size, "expression")} from ${plural(i.moments.size, "moment")} in your own chats."
+          else "${plural(i.expressions.size, "phrase")} from ${plural(i.moments.size, "lookup")} in your own chats."
         },
       )
     }
@@ -88,15 +92,16 @@ fun MemoryScreen(nav: Navigator, modifier: Modifier = Modifier) {
             )
           }
         }
+        Muted(shelf.hint, MaterialTheme.typography.bodySmall, Modifier.padding(start = 4.dp, bottom = 4.dp))
       }
     }
     if (snap == null) return@LazyColumn
     when (shelf) {
-      Shelf.Expressions -> {
+      Shelf.Phrases -> {
         if (expressions.isEmpty()) item { EmptyShelf(shelf, q.isNotEmpty()) }
         items(expressions, key = { it.key }) { e -> ExpressionRow(e, onClick = { nav.open(Page.Expression(e.key)) }) }
       }
-      Shelf.Moments -> {
+      Shelf.History -> {
         if (moments.isEmpty()) item { EmptyShelf(shelf, q.isNotEmpty()) }
         moments.groupBy { dayOf(it.createdAt) }.forEach { (day, list) ->
           item(key = "day-$day") { DayHeader(day) }
@@ -119,14 +124,14 @@ private fun EmptyShelf(shelf: Shelf, searching: Boolean) {
     return
   }
   when (shelf) {
-    Shelf.Expressions -> EmptyState(
+    Shelf.Phrases -> EmptyState(
       R.drawable.ic_library,
-      "No expressions yet",
+      "No phrases yet",
       "Each phrase Langboard helps you say is kept here, with the sentence you used it in.",
     )
-    Shelf.Moments -> EmptyState(
+    Shelf.History -> EmptyState(
       R.drawable.ic_history,
-      "No moments yet",
+      "Nothing here yet",
       "Each time you switch to Langboard in a chat, what you asked and what it answered shows up here.",
     )
     Shelf.Saved -> EmptyState(

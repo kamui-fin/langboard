@@ -11,6 +11,13 @@
     "neutral": "自然的日常聊天",
     "formal": "礼貌、正式的工作沟通"
   },
+  "style_hints": {
+    "slang_medium": "可以适当用些流行语",
+    "concise": "简短",
+    "expressive": "表达充分一些",
+    "soft": "语气委婉",
+    "direct": "直截了当"
+  },
   "fill": {
     "format": "continue",
     "template": "【背景信息】\n{context}\n\n请结合背景信息将以下文本翻译为中文。注意翻译的风格要严格符合【{style}】，只需要输出翻译后的结果，不要额外解释。\n\n【待翻译文本】\n{draft}",

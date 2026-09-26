@@ -23,6 +23,11 @@ class LangboardSettings(context: Context) {
       ?: Register.Casual
     set(value) = prefs.edit().putString(KEY_DEFAULT_REGISTER, value.name).apply()
 
+  /** My Style: how the user wants to sound, beyond the register. Read by the keyboard on each lookup. */
+  var myStyle: MyStyle
+    get() = MyStyle.fromJson(prefs.getString(KEY_MY_STYLE, null))
+    set(value) = prefs.edit().putString(KEY_MY_STYLE, value.toJson()).apply()
+
   /** The screens before the trial have been seen once; a lapsed subscriber goes straight to the paywall. */
   var introSeen: Boolean
     get() = prefs.getBoolean(KEY_INTRO_SEEN, false)
@@ -128,6 +133,7 @@ class LangboardSettings(context: Context) {
     val OPTION_COUNTS = listOf(3, 5, 10)
     private const val KEY_COLOR_SOURCE = "color_source"
     private const val KEY_DEFAULT_REGISTER = "default_register"
+    private const val KEY_MY_STYLE = "my_style"
     private const val KEY_INTRO_SEEN = "intro_seen"
     private const val KEY_SETUP_DONE = "setup_done"
     private const val KEY_PRO_ACTIVE = "pro_active"

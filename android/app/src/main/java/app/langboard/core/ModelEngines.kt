@@ -142,10 +142,12 @@ class ModelExplainEngine(private val model: TextModel, private val prompts: () -
  * [AssistMode.NATIVE]), it reads naturally and nothing is shown.
  */
 class ModelCheckEngine(private val model: TextModel, private val prompts: () -> PromptBook) : NaturalizeEngine {
-  override suspend fun review(sentence: String, mode: AssistMode, register: Register, screen: ScreenText): NaturalizeResult? {
+  override suspend fun review(
+    sentence: String, mode: AssistMode, register: Register, screen: ScreenText, personal: PersonalStyle,
+  ): NaturalizeResult? {
     if (mode == AssistMode.STUCK) return null
     val book = prompts()
-    val outs = model.beams(book.check(sentence, register, screen), Beams(book.check.beams, book.check.maxTokens, book.check.lengthAlpha))
+    val outs = model.beams(book.check(sentence, register, screen, personal), Beams(book.check.beams, book.check.maxTokens, book.check.lengthAlpha))
       ?.map { it.text } ?: return null
     val picky = mode == AssistMode.NATIVE
     val best = outs.firstOrNull() ?: return null

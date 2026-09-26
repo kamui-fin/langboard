@@ -172,7 +172,7 @@ private fun WeekPanel(week: Insights.Week, onOpen: (Expression) -> Unit) {
     Row {
       Stat("${week.moments}", "asked", Modifier.weight(1f))
       Stat("${week.used}", "sent", Modifier.weight(1f))
-      Stat("${week.newExpressions.size}", "new expressions", Modifier.weight(1f))
+      Stat("${week.newExpressions.size}", "new phrases", Modifier.weight(1f))
     }
     if (week.newExpressions.isNotEmpty()) {
       Spacer(Modifier.height(18.dp))

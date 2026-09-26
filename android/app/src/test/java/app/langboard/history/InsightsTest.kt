@@ -100,19 +100,6 @@ class InsightsTest {
     assertEquals(2, w.apps)
   }
 
-  @Test fun registersAndAppsAreCountedMostFirstWithoutTheLab() {
-    val i = Insights(
-      listOf(
-        fill("a", "一", 1, register = "casual", app = "com.whatsapp"),
-        fill("b", "二", 2, register = "casual", app = "com.whatsapp"),
-        fill("c", "三", 3, register = "formal", app = "app.langboard"),
-      ),
-      emptyMap(),
-    )
-    assertEquals(listOf("casual" to 2, "formal" to 1), i.registers)
-    assertEquals(listOf("com.whatsapp" to 2), i.apps)
-  }
-
   @Test fun recallRateNeedsEnoughReviews() {
     val few = List(5) { ReviewRecord("k", it.toLong(), Fsrs.Rating.Good) }
     assertNull(Insights(emptyList(), emptyMap(), few).recallRate)

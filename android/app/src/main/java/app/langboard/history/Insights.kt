@@ -122,14 +122,6 @@ class Insights(
     )
   }
 
-  /** Register of the chats Langboard read, most common first, with counts. Only lookups that read the screen have one. */
-  val registers: List<Pair<String, Int>> = all.mapNotNull { it.register }.groupingBy { it }.eachCount()
-    .toList().sortedByDescending { it.second }
-
-  /** Apps Langboard was used in, most first. Langboard's own Lab is left out. */
-  val apps: List<Pair<String, Int>> = moments.mapNotNull { it.app }.filter { it != "app.langboard" }
-    .groupingBy { it }.eachCount().toList().sortedByDescending { it.second }
-
   /** Share of reviews recalled (anything but Again), or null before there are enough to mean anything. */
   val recallRate: Double? = reviews.takeIf { it.size >= MIN_REVIEWS_FOR_RATE }
     ?.let { r -> r.count { it.rating != Fsrs.Rating.Again }.toDouble() / r.size }
@@ -150,7 +142,9 @@ class Insights(
       return n
     }
 
-    fun hasChinese(s: String): Boolean = s.any { Character.UnicodeScript.of(it.code) == Character.UnicodeScript.HAN }
+    fun hasChinese(s: String): Boolean = s.any(::hasChineseChar)
+
+    fun hasChineseChar(c: Char): Boolean = Character.UnicodeScript.of(c.code) == Character.UnicodeScript.HAN
 
     /** About how long [cards] take, at roughly 8 seconds a card, rounded up to a minute. */
     fun minutesFor(cards: Int): Int = ((cards * 8 + 59) / 60).coerceAtLeast(1)

@@ -125,8 +125,8 @@ fun ExpressionScreen(key: String, nav: Navigator, modifier: Modifier = Modifier)
         )
       }
 
-      Section("Moments") {
-        // Reopening the panel on the same draft makes a moment twice; show it once.
+      Section("Each time you needed it") {
+        // Reopening the panel on the same draft makes a lookup twice; show it once.
         e.entries.distinctBy { it.sentence ?: it.source }.forEachIndexed { i, m ->
           if (i > 0) Spacer(Modifier.height(4.dp))
           Surface(onClick = { nav.open(Page.Moment(m.id)) }, color = MaterialTheme.colorScheme.surface) {
@@ -147,7 +147,7 @@ fun ExpressionScreen(key: String, nav: Navigator, modifier: Modifier = Modifier)
     AlertDialog(
       onDismissRequest = { confirmForget = false },
       title = { Text("Forget ${e.chinese}?") },
-      text = { Text("This deletes ${plural(e.entries.size, "moment")} with it, and it won't come up in Review again. It can't be undone.") },
+      text = { Text("This deletes ${plural(e.entries.size, "lookup")} with it, and it won't come up in Review again. It can't be undone.") },
       confirmButton = {
         TextButton(onClick = {
           confirmForget = false

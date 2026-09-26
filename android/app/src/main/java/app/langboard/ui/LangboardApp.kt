@@ -48,6 +48,7 @@ private enum class Tab(val label: String, @DrawableRes val icon: Int) {
 sealed interface Page {
   data object Lab : Page
   data object Settings : Page
+  data object MyStyle : Page
   data object ReviewSession : Page
   data class Expression(val key: String) : Page
   data class Moment(val id: Long) : Page
@@ -55,6 +56,7 @@ sealed interface Page {
   fun encode(): String = when (this) {
     Lab -> "lab"
     Settings -> "settings"
+    MyStyle -> "style"
     ReviewSession -> "review"
     is Expression -> "expr:$key"
     is Moment -> "moment:$id"
@@ -65,6 +67,7 @@ sealed interface Page {
       s == null -> null
       s == "lab" -> Lab
       s == "settings" -> Settings
+      s == "style" -> MyStyle
       s == "review" -> ReviewSession
       s.startsWith("expr:") -> Expression(s.removePrefix("expr:"))
       s.startsWith("moment:") -> s.removePrefix("moment:").toLongOrNull()?.let { Moment(it) }
@@ -143,6 +146,7 @@ fun LangboardApp() {
           when (p) {
             Page.Lab -> WriteScreen(chat, onBack = nav::back, modifier = m)
             Page.Settings -> SettingsScreen(onBack = nav::back, modifier = m)
+            Page.MyStyle -> MyStyleScreen(onBack = nav::back, modifier = m)
             Page.ReviewSession -> ReviewScreen(onClose = nav::back, modifier = m)
             is Page.Expression -> ExpressionScreen(p.key, nav, m)
             is Page.Moment -> MomentScreen(p.id, nav, m)

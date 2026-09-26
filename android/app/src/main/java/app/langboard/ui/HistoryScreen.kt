@@ -252,7 +252,7 @@ private fun ExplainDetail(e: HistoryEntry) {
   Text(e.source, fontSize = 26.sp, lineHeight = 36.sp)
   e.sentence?.let { Spacer(Modifier.height(10.dp)); Muted(it, MaterialTheme.typography.titleMedium) }
   e.answer?.let {
-    Section("Key expression") { Hero(it, e.pinyin, e.meaning, size = 32) }
+    Section("Key phrase") { Hero(it, e.pinyin, e.meaning, size = 32) }
   }
   if (e.items.isNotEmpty()) Section("Also in it") { CandidateList(e.items) }
 }

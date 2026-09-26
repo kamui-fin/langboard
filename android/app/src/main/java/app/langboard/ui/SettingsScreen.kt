@@ -49,7 +49,6 @@ import app.langboard.core.AssistMode
 import app.langboard.core.LangboardSettings
 import app.langboard.core.LangboardSettings.AfterInsert
 import app.langboard.core.LangboardSettings.ColorSource
-import app.langboard.core.Register
 import app.langboard.billing.Subscription
 import app.langboard.ui.theme.dynamicColorAvailable
 import app.langboard.dictionary.DictionaryManager
@@ -87,7 +86,6 @@ private fun SuggestionSettings(settings: LangboardSettings) {
   var assistMode by remember { mutableStateOf(settings.assistMode) }
   var optionCount by remember { mutableStateOf(settings.optionCount) }
   var afterInsert by remember { mutableStateOf(settings.afterInsert) }
-  var register by remember { mutableStateOf(settings.defaultRegister) }
 
   SettingsGroup("How much help") {
     Column(Modifier.selectableGroup()) {
@@ -120,12 +118,6 @@ private fun SuggestionSettings(settings: LangboardSettings) {
       choices = listOf(AfterInsert.STAY to "Stay, with Undo", AfterInsert.RETURN to "Back to my keyboard"),
       selected = afterInsert,
     ) { afterInsert = it; settings.afterInsert = it }
-    GroupDivider()
-    ChoiceRow(
-      title = "Sound, unless the chat says otherwise",
-      choices = listOf(Register.Casual, Register.Neutral, Register.Formal).map { it to it.choice },
-      selected = register,
-    ) { register = it; settings.defaultRegister = it }
     GroupDivider()
     NavRow("Keyboard settings", "Languages, and which keyboards are on") {
       context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
@@ -233,7 +225,7 @@ private fun HistorySettings(settings: LangboardSettings) {
   var confirm by remember { mutableStateOf(false) }
   SettingsGroup("Memory") {
     SwitchRow(
-      "Remember my moments",
+      "Keep my history",
       "What you asked and what Langboard answered, on this phone only. It's what Home, Review and Memory are built from. Saved phrases are kept either way.",
       keep,
     ) { keep = it; settings.keepHistory = it }
@@ -244,7 +236,7 @@ private fun HistorySettings(settings: LangboardSettings) {
     AlertDialog(
       onDismissRequest = { confirm = false },
       title = { Text("Clear Memory?") },
-      text = { Text("This deletes every moment, saved phrase and review progress. It can't be undone.") },
+      text = { Text("This deletes your history, saved phrases and review progress. It can't be undone.") },
       confirmButton = {
         TextButton(onClick = {
           confirm = false
@@ -375,7 +367,7 @@ private fun ActionRow(title: String, destructive: Boolean = false, onClick: () -
 }
 
 @Composable
-private fun <T> ChoiceRow(title: String, choices: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit) {
+internal fun <T> ChoiceRow(title: String, choices: List<Pair<T, String>>, selected: T, onSelect: (T) -> Unit) {
   Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
     Text(title, style = MaterialTheme.typography.bodyLarge)
     SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {

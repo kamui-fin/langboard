@@ -23,7 +23,9 @@ data class NaturalizeResult(val original: String, val natural: String, val alter
 
 interface NaturalizeEngine {
   /** Returns null when the sentence already reads naturally at this [mode]. Must be cancellable. */
-  suspend fun review(sentence: String, mode: AssistMode, register: Register, screen: ScreenText): NaturalizeResult?
+  suspend fun review(
+    sentence: String, mode: AssistMode, register: Register, screen: ScreenText, personal: PersonalStyle = PersonalStyle.NONE,
+  ): NaturalizeResult?
 }
 
 /** The Chinese sentence just before the caret: the text before it ends with `sentence + tail`. */
