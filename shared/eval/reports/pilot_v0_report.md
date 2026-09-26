@@ -29,10 +29,25 @@ Held-out training loss: Hy-MT2 0.59, Qwen3.5 0.73.
   gained 7 on EN→ZH Fill but stays 16 behind, still with 7 critical errors. This is Outcome 2 in the
   decision framework ("Hy-MT2 turns out to be surprisingly trainable"), provisionally.
 - **Restraint swung too far on both.** Tuned Hy-MT2 says UNCHANGED on 13 of 28 sentences that need a
-  repair (Qwen3.5: 10). The pilot had 33% UNCHANGED within Naturalize; the §8 ratio ablation is next.
+  repair (Qwen3.5: 10). The pilot had 33% UNCHANGED within Naturalize; at 10% this drops to 7 with
+  restraint intact (ablation below).
 - **Personalization barely has data**: Tatoeba gave 1 of 50 rows (its Chinese almost never uses 啥/咋/挺).
   Hy-MT2 still went 3 → 5 of 8; its p13n number means little until real profile rows exist.
 - Style has no training rows (it needs human targets per style) and moved only for Hy-MT2 (2 → 5).
+
+## UNCHANGED ratio ablation (§8), Hy-MT2
+
+Same rows as v0 except UNCHANGED, subsampled (`pilot_v0_u10.jsonl`, `pilot_v0_u20.jsonl`); same budget.
+
+| UNCHANGED share of Naturalize | Leaves natural text alone (27) | Said UNCHANGED on a needed repair (28) | Repairs hit or near (28) | Fill EN→ZH (101) | Personalization (8) |
+| --- | --- | --- | --- | --- | --- |
+| **10%** | 26 | **7** | **11** | **71** | **7** |
+| 20% | 26 | 10 | 8 | 66 | 5 |
+| 33% (v0) | 26 | 13 | 9 | 68 | 5 |
+
+Restraint on natural text holds even at 10%, while wrong UNCHANGED answers fall with the share. **Use
+10% for the next data round** (and try 5% once, to find where restraint starts to break). One seed,
+small slices: differences of 2–3 cases are noise; the trend in the missed column is the signal.
 
 ## Not yet known
 

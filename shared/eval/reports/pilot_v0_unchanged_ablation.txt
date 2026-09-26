@@ -1,0 +1,8 @@
+slice                   hymt lb1 model-Q4_K_M.gguf |         hymt lb1 model-Q4_K_M.gguf |         hymt lb1 model-Q4_K_M.gguf
+fill_en_zh             71/101 hit,  1 crit,  5 chk |        66/101 hit,  1 crit,  4 chk |        68/101 hit,  0 crit,  3 chk
+fill_zh_en             15/26  hit,  1 crit,  4 chk |        17/26  hit,  0 crit,  6 chk |        17/26  hit,  1 crit,  3 chk
+naturalize_en           3/13  hit,  4 crit,  0 chk |         1/13  hit,  7 crit,  0 chk |         3/13  hit,  7 crit,  0 chk
+naturalize_zh           5/15  hit,  4 crit,  0 chk |         3/15  hit,  4 crit,  0 chk |         3/15  hit,  6 crit,  0 chk
+p13n                    7/8   hit,  0 crit,  0 chk |         5/8   hit,  2 crit,  0 chk |         5/8   hit,  1 crit,  0 chk
+style                   4/12  hit,  6 crit,  0 chk |         3/12  hit,  5 crit,  0 chk |         5/12  hit,  6 crit,  0 chk
+unchanged              26/27  hit,  1 crit,  0 chk |        26/27  hit,  1 crit,  0 chk |        26/27  hit,  1 crit,  0 chk
